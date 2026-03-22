@@ -16,7 +16,6 @@
             overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh;
         }
 
-        /* רקע כוכבים ואבק זהב */
         #stars-layer { 
             position: fixed; top: -50px; left: -50px; width: calc(100% + 100px); height: calc(100% + 100px); 
             z-index: 1; pointer-events: none; transition: transform 0.2s ease-out;
@@ -27,7 +26,6 @@
         @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.5; } }
         @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-100px); opacity: 0; } }
 
-        /* סרט תמונות */
         .film-strip {
             width: 100%; background: #000; padding: 25px 0;
             border-top: 1px solid rgba(212, 175, 55, 0.3);
@@ -51,9 +49,9 @@
         }
         .frame:hover { transform: scale(1.05); border: 1px solid var(--gold); z-index: 11; }
         .frame img { width: 100%; height: 100%; object-fit: cover; }
-        @keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(50%); } }
+        /* האנימציה זזה שמאלה (מ-0 ל-50%-) כדי ליצור לופ חלק */
+        @keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* תוכן מרכזי */
         .main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 10; }
         
         .greeting-area { margin-bottom: 25px; min-height: 80px; }
@@ -63,7 +61,6 @@
             transition: opacity 0.8s, transform 0.8s; opacity: 0; transform: translateY(10px);
         }
 
-        /* עיצוב התאריכים */
         .hebrew-title { 
             font-family: 'Assistant', sans-serif; font-size: clamp(2.8rem, 12vw, 5.5rem); 
             color: var(--gold); margin: 0; font-weight: 700; letter-spacing: -1px;
@@ -73,7 +70,6 @@
             color: rgba(212, 175, 55, 0.6); margin-top: 5px; letter-spacing: 3px;
         }
 
-        /* טיימר */
         .counter-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 35px 0; }
         .unit { 
             text-align: center; min-width: 85px; padding: 20px 10px; background: var(--glass); 
@@ -82,12 +78,10 @@
         .unit .val { font-size: 2.5rem; font-weight: 700; display: block; color: #fff; }
         .unit .lbl { font-size: 0.7rem; color: var(--gold); text-transform: uppercase; margin-top: 5px; }
 
-        /* פס אחוזים */
         .progress-container { width: 320px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 20px; position: relative; overflow: hidden; }
         #progress-bar { height: 100%; width: 0%; background: var(--gold); box-shadow: 0 0 10px var(--gold); transition: width 0.5s ease; }
         #percent-text { font-size: 0.85rem; color: #888; margin-top: 12px; letter-spacing: 1px; }
 
-        /* מציג תמונה */
         #lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 1000; }
         #lightbox.active { display: flex; }
         #lightbox img { max-width: 90%; max-height: 85%; border-radius: 5px; }
@@ -187,19 +181,16 @@
             }
         }
 
-        function initPhotos() {
-            // התיקון הממוקד לסיומת הקבצים כפי שמופיעה ב-GitHub
+        // פונקציה ליצירת סט של תמונות (1 עד 20)
+        function createSet() {
+            const container = document.createDocumentFragment();
             for (let i = 1; i <= 20; i++) {
                 const f = document.createElement('div');
                 f.className = 'frame';
                 const img = document.createElement('img');
-                
-                // שימוש בסיומת jpg קטנה כפי שמופיע בתיקייה שלך
                 img.src = `images/${i}.jpg`;
                 
-                img.onerror = () => { 
-                    f.style.display = 'none'; // מחביא ריבועים שחורים של תמונות שלא קיימות
-                };
+                img.onerror = () => { f.remove(); }; // אם התמונה לא קיימת, נמחק את המסגרת לגמרי
 
                 img.onclick = () => {
                     document.getElementById('lightbox-img').src = img.src;
@@ -207,12 +198,22 @@
                 };
 
                 f.appendChild(img);
-                track.appendChild(f);
+                container.appendChild(f);
             }
-            setTimeout(() => { 
+            return container;
+        }
+
+        function initPhotos() {
+            // אנחנו יוצרים שני סטים שלמים. האנימציה תעבור על הסט הראשון ותקפוץ חזרה להתחלה בדיוק כשהיא מגיעה לשני.
+            track.appendChild(createSet());
+            track.appendChild(createSet());
+
+            // מחכים שהתמונות יטענו כדי לחשב את המהירות
+            setTimeout(() => {
                 if(track.children.length > 0) {
-                    track.innerHTML += track.innerHTML; 
-                    track.style.animationDuration = '60s'; 
+                    // ככל שיש יותר תמונות, האנימציה צריכה להיות איטית יותר כדי שיהיה נעים בעין
+                    const totalWidth = track.scrollWidth;
+                    track.style.animationDuration = '80s'; 
                 }
             }, 1000);
         }
