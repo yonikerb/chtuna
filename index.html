@@ -26,12 +26,16 @@
         @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.5; } }
         @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-100px); opacity: 0; } }
 
+        /* סרט תמונות עם אפקט דהייה בצדדים */
         .film-strip {
             width: 100%; background: #000; padding: 25px 0;
             border-top: 1px solid rgba(212, 175, 55, 0.3);
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             position: relative; z-index: 5; overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,1);
+            /* אפקט דהייה (Gradient Mask) */
+            -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
+            mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
         }
 
         .film-strip::before, .film-strip::after {
@@ -41,7 +45,13 @@
         }
         .film-strip::before { top: 5px; } .film-strip::after { bottom: 5px; }
 
-        .film-track { display: flex; width: max-content; animation: slide linear infinite; cursor: pointer; padding: 15px 0; }
+        .film-track { 
+            display: flex; 
+            width: max-content; 
+            animation: slide linear infinite; 
+            cursor: pointer; 
+            padding: 15px 0;
+        }
         
         .frame { 
             width: 260px; height: 170px; margin: 0 10px; background: #111; 
@@ -49,8 +59,12 @@
         }
         .frame:hover { transform: scale(1.05); border: 1px solid var(--gold); z-index: 11; }
         .frame img { width: 100%; height: 100%; object-fit: cover; }
-        /* האנימציה זזה שמאלה (מ-0 ל-50%-) כדי ליצור לופ חלק */
-        @keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        /* תיקון האנימציה לעבודה עם RTL - תזוזה ל-50% חיובי במקום שלילי */
+        @keyframes slide { 
+            0% { transform: translateX(0); } 
+            100% { transform: translateX(50%); } 
+        }
 
         .main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 10; }
         
@@ -181,16 +195,16 @@
             }
         }
 
-        // פונקציה ליצירת סט של תמונות (1 עד 20)
         function createSet() {
             const container = document.createDocumentFragment();
+            // יצירת סט של 20 תמונות
             for (let i = 1; i <= 20; i++) {
                 const f = document.createElement('div');
                 f.className = 'frame';
                 const img = document.createElement('img');
                 img.src = `images/${i}.jpg`;
                 
-                img.onerror = () => { f.remove(); }; // אם התמונה לא קיימת, נמחק את המסגרת לגמרי
+                img.onerror = () => { f.remove(); }; 
 
                 img.onclick = () => {
                     document.getElementById('lightbox-img').src = img.src;
@@ -204,15 +218,13 @@
         }
 
         function initPhotos() {
-            // אנחנו יוצרים שני סטים שלמים. האנימציה תעבור על הסט הראשון ותקפוץ חזרה להתחלה בדיוק כשהיא מגיעה לשני.
+            // הוספת שני סטים כדי לאפשר לופ אינסופי חלק
             track.appendChild(createSet());
             track.appendChild(createSet());
 
-            // מחכים שהתמונות יטענו כדי לחשב את המהירות
             setTimeout(() => {
                 if(track.children.length > 0) {
-                    // ככל שיש יותר תמונות, האנימציה צריכה להיות איטית יותר כדי שיהיה נעים בעין
-                    const totalWidth = track.scrollWidth;
+                    // מהירות האנימציה - ככל שהמספר גבוה יותר, התנועה איטית יותר
                     track.style.animationDuration = '80s'; 
                 }
             }, 1000);
