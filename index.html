@@ -276,6 +276,35 @@
         loadQuotes();
         setInterval(updateCounter, 1000);
         updateCounter();
+
+        // רישום ה-Service Worker להתראות
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(registration => {
+            console.log('Service Worker registered!');
+            
+            // בקשת אישור לשליחת התראות
+            Notification.requestPermission().then(permission => {
+                if (permission === 'granted') {
+                    console.log('Notification permission granted.');
+                }
+            });
+        });
+    });
+}
+
+// פונקציה לבדיקה - שלח התראה כשהמשתמש לוחץ על משהו (למשל על הלוגו)
+function sendTestNotification() {
+    if (Notification.permission === 'granted') {
+        navigator.serviceWorker.ready.then(registration => {
+            registration.showNotification('סופרים את השניות!', {
+                body: 'עוד יום אחד פחות בדרך לחתונה... ❤️',
+                icon: 'logo.png',
+                badge: 'logo.png'
+            });
+        });
+    }
+}
     </script>
 </body>
 </html>
