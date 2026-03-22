@@ -188,28 +188,33 @@
         }
 
         function initPhotos() {
-            const exts = ['jpg', 'png', 'jpeg', 'webp'];
+            // התיקון הממוקד לסיומת הקבצים כפי שמופיעה ב-GitHub
             for (let i = 1; i <= 20; i++) {
                 const f = document.createElement('div');
                 f.className = 'frame';
                 const img = document.createElement('img');
-                let extIdx = 0;
-                function tryLoad() {
-                    if (extIdx < exts.length) {
-                        img.src = `images/${i}.${exts[extIdx]}`;
-                        extIdx++;
-                    } else { f.style.display = 'none'; }
-                }
-                img.onerror = tryLoad;
+                
+                // שימוש בסיומת jpg קטנה כפי שמופיע בתיקייה שלך
+                img.src = `images/${i}.jpg`;
+                
+                img.onerror = () => { 
+                    f.style.display = 'none'; // מחביא ריבועים שחורים של תמונות שלא קיימות
+                };
+
                 img.onclick = () => {
                     document.getElementById('lightbox-img').src = img.src;
                     document.getElementById('lightbox').classList.add('active');
                 };
-                tryLoad();
+
                 f.appendChild(img);
                 track.appendChild(f);
             }
-            setTimeout(() => { track.innerHTML += track.innerHTML; track.style.animationDuration = '60s'; }, 1000);
+            setTimeout(() => { 
+                if(track.children.length > 0) {
+                    track.innerHTML += track.innerHTML; 
+                    track.style.animationDuration = '60s'; 
+                }
+            }, 1000);
         }
 
         const startDate = new Date("February 22, 2026 00:00:00");
