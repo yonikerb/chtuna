@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>חתונה</title>
+    
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -21,14 +22,17 @@
             margin: 0; padding: 0; background-color: var(--bg); color: white;
             overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh;
         }
+
         #stars-layer { 
             position: fixed; top: -50px; left: -50px; width: calc(100% + 100px); height: calc(100% + 100px); 
             z-index: 1; pointer-events: none; transition: transform 0.2s ease-out;
         }
         .star { position: absolute; background: white; border-radius: 50%; opacity: 0; animation: twinkle var(--duration) infinite ease-in-out; }
         .gold-dust { position: absolute; background: var(--gold); border-radius: 50%; opacity: 0.3; filter: blur(1px); animation: drift var(--duration) infinite linear; }
+        
         @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.5; } }
         @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-100px); opacity: 0; } }
+
         .film-strip {
             width: 100%; background: #000; padding: 25px 0;
             border-top: 1px solid rgba(212, 175, 55, 0.3);
@@ -38,23 +42,30 @@
             -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
             mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
         }
+
         .film-track { display: flex; width: max-content; animation: slide linear infinite; cursor: pointer; padding: 15px 0; }
         .frame { width: 260px; height: 170px; margin: 0 10px; background: #111; flex-shrink: 0; border-radius: 2px; overflow: hidden; transition: 0.4s; }
         .frame img { width: 100%; height: 100%; object-fit: cover; }
+
         @keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(50%); } }
+
         .main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 10; }
         .greeting-area { margin-bottom: 25px; min-height: 80px; }
         #greeting-text { font-size: 1.4rem; color: var(--gold); font-weight: 700; margin-bottom: 8px; }
         #quote-display { font-size: 1.1rem; color: #ccc; font-style: italic; transition: opacity 0.8s; opacity: 0; }
+
         .hebrew-title { font-size: clamp(2.8rem, 12vw, 5.5rem); color: var(--gold); margin: 0; font-weight: 700; }
         .english-sub { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: rgba(212, 175, 55, 0.6); margin-top: 5px; }
+
         .counter-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin: 35px 0; }
         .unit { text-align: center; min-width: 85px; padding: 20px 10px; background: var(--glass); border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.1); }
         .unit .val { font-size: 2.5rem; font-weight: 700; display: block; color: #fff; }
         .unit .lbl { font-size: 0.7rem; color: var(--gold); text-transform: uppercase; }
+
         .progress-container { width: 320px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 10px; margin-top: 20px; overflow: hidden; }
         #progress-bar { height: 100%; width: 0%; background: var(--gold); box-shadow: 0 0 10px var(--gold); transition: width 0.5s ease; }
         #percent-text { font-size: 0.85rem; color: #888; margin-top: 12px; }
+
         #lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); display: none; justify-content: center; align-items: center; z-index: 1000; }
         #lightbox.active { display: flex; }
         #lightbox img { max-width: 90%; max-height: 85%; }
@@ -71,8 +82,10 @@
             <div id="greeting-text">טוען...</div>
             <div id="quote-display"></div>
         </div>
+        
         <h1 class="hebrew-title">א׳ בתמוז תשפ״ו</h1>
         <div class="english-sub">16 . 06 . 2026</div>
+        
         <div class="counter-grid">
             <div class="unit"><span class="val" id="m-val">0</span><span class="lbl">חודשים</span></div>
             <div class="unit"><span class="val" id="d-val">0</span><span class="lbl">ימים</span></div>
@@ -80,140 +93,78 @@
             <div class="unit"><span class="val" id="min-val">0</span><span class="lbl">דקות</span></div>
             <div class="unit"><span class="val" id="sec-val">0</span><span class="lbl">שניות</span></div>
         </div>
+
         <div class="progress-container"><div id="progress-bar"></div></div>
         <div id="percent-text">מחשב התקדמות...</div>
     </div>
 
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
-
     <script>
-        // 1. הגדרות Firebase שלך
-        const firebaseConfig = {
-            apiKey: "AIzaSyDxvUkaKOBjvmOz0WRxSMXEobAsqmldrzg",
-            authDomain: "weddingcountdown-fe0ea.firebaseapp.com",
-            projectId: "weddingcountdown-fe0ea",
-            storageBucket: "weddingcountdown-fe0ea.firebasestorage.app",
-            messagingSenderId: "884026968676",
-            appId: "1:884026968676:web:c7d6324227126b616aad71"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const messaging = firebase.messaging();
-
-        // 2. לוגיקה של האתר
+        // לוגיקת כוכבים ואנימציה
         const starsLayer = document.getElementById('stars-layer');
         const track = document.getElementById('track');
         const quoteDisplay = document.getElementById('quote-display');
         const greetingText = document.getElementById('greeting-text');
+        
         let quotes = ["מחכים לרגע המיוחד...", "עוד קצת וזה קורה", "סופרים את השניות"];
         let quoteIdx = 0;
 
-        async function loadQuotes() {
-            try {
-                const response = await fetch('משפטים.txt');
-                if (response.ok) {
-                    const text = await response.text();
-                    const lines = text.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-                    if (lines.length > 0) quotes = lines;
-                }
-            } catch (e) { console.log("Default quotes used"); }
-            startQuoteRotation();
-        }
-
-        function startQuoteRotation() {
-            function rotate() {
-                updateGreeting();
-                quoteDisplay.style.opacity = 0;
-                setTimeout(() => {
-                    quoteDisplay.innerText = quotes[quoteIdx];
-                    quoteDisplay.style.opacity = 1;
-                    quoteIdx = (quoteIdx + 1) % quotes.length;
-                }, 800);
-            }
-            setInterval(rotate, 10000); rotate();
-        }
-
         function updateGreeting() {
             const hour = new Date().getHours();
-            let text = (hour >= 5 && hour < 12) ? "בוקר טוב" : (hour >= 12 && hour < 17) ? "צהריים טובים" : (hour >= 17 && hour < 21) ? "ערב טוב" : "לילה טוב";
+            let text = "יום קסום";
+            if (hour >= 5 && hour < 12) text = "בוקר טוב";
+            else if (hour >= 12 && hour < 17) text = "צהריים טובים";
+            else if (hour >= 17 && hour < 21) text = "ערב טוב";
+            else text = "לילה טוב";
             greetingText.innerText = text;
         }
 
         function createBackground() {
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 150; i++) {
                 const div = document.createElement('div');
                 div.className = Math.random() > 0.8 ? 'gold-dust' : 'star';
-                div.style.width = div.style.height = (Math.random() * 2 + 1) + 'px';
+                const s = (Math.random() * 2 + 1) + 'px';
+                div.style.width = s; div.style.height = s;
                 div.style.top = Math.random() * 100 + '%';
                 div.style.left = Math.random() * 100 + '%';
-                div.style.setProperty('--duration', (Math.random() * 3 + 2) + 's');
+                div.style.setProperty('--duration', (Math.random() * 4 + 2) + 's');
                 starsLayer.appendChild(div);
             }
         }
 
-        const targetDate = new Date("June 16, 2026 19:00:00");
         const startDate = new Date("February 22, 2026 00:00:00");
+        const targetDate = new Date("June 16, 2026 19:00:00");
 
         function updateCounter() {
             const now = new Date();
             const remaining = targetDate - now;
-            if (remaining <= 0) { document.querySelector('.main').innerHTML = "<h1>❤️ חתונה! ❤️</h1>"; return; }
-            
+
+            if (remaining <= 0) {
+                document.querySelector('.main').innerHTML = "<h1>❤️ הגיע הרגע! ❤️</h1>";
+                return;
+            }
+
             const percent = (((now - startDate) / (targetDate - startDate)) * 100).toFixed(4);
             document.getElementById('progress-bar').style.width = percent + "%";
-            document.getElementById('percent-text').innerText = `${percent}% מהציפייה עברו`;
+            document.getElementById('percent-text').innerText = `${percent}% מהציפייה כבר מאחורינו`;
 
             const sec = Math.floor(remaining / 1000);
-            document.getElementById('m-val').innerText = Math.floor(sec / 2630016);
-            document.getElementById('d-val').innerText = Math.floor((sec % 2630016) / 86400);
+            const days = Math.floor(sec / 86400);
+            document.getElementById('m-val').innerText = Math.floor(days / 30.44);
+            document.getElementById('d-val').innerText = Math.floor(days % 30.44);
             document.getElementById('h-val').innerText = Math.floor((sec % 86400) / 3600);
             document.getElementById('min-val').innerText = Math.floor((sec % 3600) / 60);
             document.getElementById('sec-val').innerText = sec % 60;
         }
 
-        createBackground(); loadQuotes(); setInterval(updateCounter, 1000); updateCounter();
+        // הפעלה
+        createBackground();
+        updateGreeting();
+        setInterval(updateCounter, 1000);
+        updateCounter();
 
-        // 3. רישום התראות וקבלת טוקן
+        // רישום Service Worker פשוט (ללא התראות, רק ל-PWA)
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js').then(reg => {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            // !!! כאן להדביק את ה-VAPID KEY שלך !!!
-                            messaging.getToken({ 
-                                vapidKey: '// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-const firebaseConfig = {
-  apiKey: "AIzaSyDxvUkaKOBjvmOz0WRxSMXEobAsqmldrzg",
-  authDomain: "weddingcountdown-fe0ea.firebaseapp.com",
-  projectId: "weddingcountdown-fe0ea",
-  storageBucket: "weddingcountdown-fe0ea.firebasestorage.app",
-  messagingSenderId: "884026968676",
-  appId: "1:884026968676:web:c7d6324227126b616aad71",
-  measurementId: "G-9V8FSWCD33"
-};
-
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);', 
-                                serviceWorkerRegistration: reg 
-                            }).then(token => {
-                                if (token) {
-                                    alert("הטוקן שלך הוא: " + token);
-                                    console.log("Token:", token);
-                                }
-                            });
-                        }
-                    });
-                });
-            });
+            navigator.serviceWorker.register('sw.js');
         }
     </script>
 </body>
