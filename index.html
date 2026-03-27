@@ -205,8 +205,8 @@
 
         function createSet() {
             const container = document.createDocumentFragment();
-            // יצירת סט של 20 תמונות
-            for (let i = 1; i <= 20; i++) {
+            // הלולאה מתחילה ב-20 ויורדת ל-1 כדי שהתמונה הגבוהה תופיע ראשונה
+            for (let i = 20; i >= 1; i--) {
                 const f = document.createElement('div');
                 f.className = 'frame';
                 const img = document.createElement('img');
@@ -226,13 +226,11 @@
         }
 
         function initPhotos() {
-            // הוספת שני סטים כדי לאפשר לופ אינסופי חלק
             track.appendChild(createSet());
             track.appendChild(createSet());
 
             setTimeout(() => {
                 if(track.children.length > 0) {
-                    // מהירות האנימציה - ככל שהמספר גבוה יותר, התנועה איטית יותר
                     track.style.animationDuration = '80s'; 
                 }
             }, 1000);
@@ -277,13 +275,11 @@
         setInterval(updateCounter, 1000);
         updateCounter();
 
-        // רישום ה-Service Worker להתראות
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('sw.js').then(registration => {
             console.log('Service Worker registered!');
             
-            // בקשת אישור לשליחת התראות
             Notification.requestPermission().then(permission => {
                 if (permission === 'granted') {
                     console.log('Notification permission granted.');
@@ -293,7 +289,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// פונקציה לבדיקה - שלח התראה כשהמשתמש לוחץ על משהו (למשל על הלוגו)
 function sendTestNotification() {
     if (Notification.permission === 'granted') {
         navigator.serviceWorker.ready.then(registration => {
