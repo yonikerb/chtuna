@@ -6,11 +6,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>חתונה</title>
     <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="החתונה שלנו">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="החתונה שלנו">
 
-<link rel="apple-touch-icon" href="logo.png">
+    <link rel="apple-touch-icon" href="logo.png">
     
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
@@ -18,11 +18,30 @@
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.05); }
         * { box-sizing: border-box; }
         body {
-            
             font-family: 'Assistant', sans-serif;
             margin: 0; padding: 0; background-color: var(--bg); color: white;
             overflow-x: hidden; display: flex; flex-direction: column; min-height: 100vh;
         }
+
+        /* תפריט צד */
+        #side-menu {
+            position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+            background: rgba(10, 10, 10, 0.95); backdrop-filter: blur(15px);
+            z-index: 2000; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-left: 1px solid var(--gold); padding: 40px 25px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+        }
+        #side-menu.open { right: 0; }
+        #menu-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); display: none; z-index: 1999;
+        }
+        .menu-link {
+            display: block; color: white; text-decoration: none; font-size: 1.4rem;
+            margin-bottom: 25px; padding-bottom: 10px; border-bottom: 1px solid rgba(212, 175, 55, 0.1);
+            transition: 0.3s;
+        }
+        .menu-link:hover { color: var(--gold); padding-right: 10px; }
 
         #stars-layer { 
             position: fixed; top: -50px; left: -50px; width: calc(100% + 100px); height: calc(100% + 100px); 
@@ -34,14 +53,12 @@
         @keyframes twinkle { 0%, 100% { opacity: 0; } 50% { opacity: 0.5; } }
         @keyframes drift { from { transform: translateY(0); } to { transform: translateY(-100px); opacity: 0; } }
 
-        /* סרט תמונות עם אפקט דהייה בצדדים */
         .film-strip {
             width: 100%; background: #000; padding: 25px 0;
             border-top: 1px solid rgba(212, 175, 55, 0.3);
             border-bottom: 1px solid rgba(212, 175, 55, 0.3);
             position: relative; z-index: 5; overflow: hidden;
             box-shadow: 0 10px 40px rgba(0,0,0,1);
-            /* אפקט דהייה (Gradient Mask) */
             -webkit-mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
             mask-image: linear-gradient(to right, transparent, black 15%, black 85%, transparent);
         }
@@ -54,11 +71,8 @@
         .film-strip::before { top: 5px; } .film-strip::after { bottom: 5px; }
 
         .film-track { 
-            display: flex; 
-            width: max-content; 
-            animation: slide linear infinite; 
-            cursor: pointer; 
-            padding: 15px 0;
+            display: flex; width: max-content; animation: slide linear infinite; 
+            cursor: pointer; padding: 15px 0;
         }
         
         .frame { 
@@ -68,11 +82,7 @@
         .frame:hover { transform: scale(1.05); border: 1px solid var(--gold); z-index: 11; }
         .frame img { width: 100%; height: 100%; object-fit: cover; }
 
-        /* תיקון האנימציה לעבודה עם RTL - תזוזה ל-50% חיובי במקום שלילי */
-        @keyframes slide { 
-            0% { transform: translateX(0); } 
-            100% { transform: translateX(50%); } 
-        }
+        @keyframes slide { 0% { transform: translateX(0); } 100% { transform: translateX(50%); } }
 
         .main { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; z-index: 10; }
         
@@ -111,6 +121,16 @@
 </head>
 <body>
 
+    <div id="menu-overlay"></div>
+    <div id="side-menu">
+        <div id="close-btn" style="color: var(--gold); font-size: 2rem; cursor: pointer; margin-bottom: 30px;">✕</div>
+        <nav>
+            <a href="index.html" class="menu-link">דף הבית</a>
+            <a href="story.html" class="menu-link">הסיפור שלנו</a>
+            <a href="gallery.html" class="menu-link">גלריה תמונות</a>
+        </nav>
+    </div>
+
     <div id="stars-layer"></div>
 
     <div class="film-strip">
@@ -148,6 +168,49 @@
         const quoteDisplay = document.getElementById('quote-display');
         const greetingText = document.getElementById('greeting-text');
         
+        // לוגיקה לתפריט והחלקה
+        const sideMenu = document.getElementById('side-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+        const closeBtn = document.getElementById('close-btn');
+
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        function openNav() {
+            sideMenu.classList.add('open');
+            menuOverlay.style.display = 'block';
+        }
+
+        function closeNav() {
+            sideMenu.classList.remove('open');
+            menuOverlay.style.display = 'none';
+        }
+
+        closeBtn.onclick = closeNav;
+        menuOverlay.onclick = closeNav;
+
+        // זיהוי החלקה (Swipe)
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        }, false);
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        }, false);
+
+        function handleSwipe() {
+            // החלקה מימין לשמאל (פתיחה)
+            if (touchStartX - touchEndX > 80) {
+                openNav();
+            }
+            // החלקה משמאל לימין (סגירה)
+            if (touchEndX - touchStartX > 80) {
+                closeNav();
+            }
+        }
+
+        // שאר הפונקציות המקוריות שלך
         let quotes = ["מחכים לרגע המיוחד...", "עוד קצת וזה קורה", "סופרים את השניות"];
         let quoteIdx = 0;
 
@@ -205,20 +268,16 @@
 
         function createSet() {
             const container = document.createDocumentFragment();
-            // הלולאה מתחילה ב-20 ויורדת ל-1 כדי שהתמונה הגבוהה תופיע ראשונה
             for (let i = 20; i >= 1; i--) {
                 const f = document.createElement('div');
                 f.className = 'frame';
                 const img = document.createElement('img');
                 img.src = `images/${i}.jpg`;
-                
                 img.onerror = () => { f.remove(); }; 
-
                 img.onclick = () => {
                     document.getElementById('lightbox-img').src = img.src;
                     document.getElementById('lightbox').classList.add('active');
                 };
-
                 f.appendChild(img);
                 container.appendChild(f);
             }
@@ -228,7 +287,6 @@
         function initPhotos() {
             track.appendChild(createSet());
             track.appendChild(createSet());
-
             setTimeout(() => {
                 if(track.children.length > 0) {
                     track.style.animationDuration = '80s'; 
@@ -275,31 +333,26 @@
         setInterval(updateCounter, 1000);
         updateCounter();
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('sw.js').then(registration => {
-            console.log('Service Worker registered!');
-            
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    console.log('Notification permission granted.');
-                }
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').then(reg => {
+                    Notification.requestPermission();
+                });
             });
-        });
-    });
-}
+        }
 
-function sendTestNotification() {
-    if (Notification.permission === 'granted') {
-        navigator.serviceWorker.ready.then(registration => {
-            registration.showNotification('סופרים את השניות!', {
-                body: 'עוד יום אחד פחות בדרך לחתונה... ❤️',
-                icon: 'logo.png',
-                badge: 'logo.png'
-            });
-        });
-    }
-}
+        function sendTestNotification() {
+            if (Notification.permission === 'granted') {
+                navigator.serviceWorker.ready.then(registration => {
+                    registration.showNotification('סופרים את השניות!', {
+                        body: 'עוד יום אחד פחות בדרך לחתונה... ❤️',
+                        icon: 'logo.png'
+                    });
+                });
+            } else {
+                alert("אנא אפשר התראות בדפדפן.");
+            }
+        }
     </script>
 </body>
 </html>
