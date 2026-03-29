@@ -6,41 +6,56 @@
     <title>יהונתן & יעל | רגעים קסומים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.05); }
+        :root { 
+            --gold: #d4af37; 
+            --bg: #050505; 
+            --glass: rgba(255, 255, 255, 0.03); 
+            --glass-border: rgba(212, 175, 55, 0.2);
+        }
+        
         body { font-family: 'Assistant', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; }
         #stars-container { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
-        header { padding: 60px 20px; text-align: center; }
-        h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4rem); color: var(--gold); margin: 0; font-style: italic; }
-        
+
+        header { padding: 80px 20px 40px; text-align: center; }
+        h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 10vw, 4.5rem); color: var(--gold); margin: 0; font-style: italic; }
+
         .gallery-wrapper { 
-            padding: 20px; columns: 4 250px; column-gap: 15px; 
-            max-width: 1400px; margin: 0 auto; padding-bottom: 100px; 
+            padding: 20px; columns: 4 280px; column-gap: 20px; 
+            max-width: 1400px; margin: 0 auto; padding-bottom: 150px; 
         }
 
-        /* הגדרה ראשונית - התמונה תופיע רק כשהיא מוכנה */
         .photo-item { 
-            display: inline-block; width: 100%; margin-bottom: 15px; 
-            border-radius: 8px; overflow: hidden; background: var(--glass); 
-            border: 1px solid rgba(212, 175, 55, 0.1); cursor: pointer;
-            opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out;
+            display: inline-block; width: 100%; margin-bottom: 20px; 
+            border-radius: 12px; overflow: hidden; background: var(--glass); 
+            backdrop-filter: blur(5px); border: 1px solid var(--glass-border); 
+            padding: 10px; box-sizing: border-box; cursor: pointer;
+            opacity: 0; transform: translateY(30px); transition: all 0.6s ease;
         }
+
         .photo-item.reveal { opacity: 1; transform: translateY(0); }
-        .photo-item img { width: 100%; display: block; transition: 0.4s; }
-        .photo-item:hover img { transform: scale(1.05); }
+        .photo-item:hover { border-color: var(--gold); background: rgba(255, 255, 255, 0.07); transform: translateY(-5px); }
+        .photo-item img { width: 100%; display: block; border-radius: 6px; }
 
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 9999; }
         #lightbox.active { display: flex; }
-        #lightbox img { max-width: 90%; max-height: 80vh; border: 1px solid var(--gold); }
-        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; }
+        #lightbox img { max-width: 90%; max-height: 80vh; border: 1px solid var(--gold); border-radius: 4px; }
+
+        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; }
+
         @media (max-width: 600px) { .gallery-wrapper { columns: 2 150px; } }
     </style>
 </head>
 <body>
 
 <div id="stars-container"></div>
+
+<audio id="bg-music" loop>
+    <source src="images/1/מלאך.mp3" type="audio/mpeg">
+</audio>
+
 <header>
     <h1>יהונתן & יעל</h1>
-    <p style="color: #888;">הגלריה שלנו</p>
+    <p style="color: #888; letter-spacing: 3px;">רגעים של מלאכים</p>
 </header>
 
 <div class="gallery-wrapper" id="main-gallery"></div>
@@ -53,14 +68,20 @@
 
 <script>
     const gallery = document.getElementById('main-gallery');
-    
-    // 1. הגדרות האותיות (א' עד ס')
-    const letters = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","יא","יב","יג","יד","טו","טז","יז","יח","יט","כ","כא","כב","כג","כד","כה","כו","כז","כח","כט","ל","לא","לב","לג","לד","לה","לו","לז","לח","לט","מ","מא","מב","מג","מד","מה","מו","מז","מח","מט","נ","נא","נב","נג","נד","נה","נו","נז","נח","נט","ס"];
-    
-    const folders = ['images', 'images/1'];
-    const formats = ['jpg', 'png', 'jpeg']; // צמצמנו פורמטים כדי למנוע חסימה מ-GitHub
+    const music = document.getElementById('bg-music');
 
-    // ה-Observer לחשיפה הדרגתית
+    // הפעלה אוטומטית של המוזיקה בלחיצה ראשונה על המסך
+    document.body.addEventListener('click', () => {
+        if (music.paused) {
+            music.play().catch(e => console.log("Music play blocked or failed:", e));
+        }
+    }, { once: true });
+
+    // יצירת רשימת אותיות א' עד ס'
+    const letters = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","יא","יב","יג","יד","טו","טז","יז","יח","יט","כ","כא","כב","כג","כד","כה","כו","כז","כח","כט","ל","לא","לב","לג","לד","לה","לו","לז","לח","לט","מ","מא","מב","מג","מד","מה","מו","מז","מח","מט","נ","נא","נב","נג","נד","נה","נו","נז","נח","נט","ס"];
+    const folders = ['images', 'images/1'];
+    const formats = ['jpg', 'png', 'jpeg', 'webp'];
+
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -70,42 +91,28 @@
         });
     }, { threshold: 0.1 });
 
-    // הפונקציה המרכזית - טוענת רק מה שקיים
     function attemptLoad(fileName) {
         let found = false;
-
-        // נסיון טעינה שקט בזיכרון
         function checkPath(folderIdx, fmtIdx) {
             if (found || folderIdx >= folders.length) return;
-
             const tempImg = new Image();
             const currentPath = `${folders[folderIdx]}/${fileName}.${formats[fmtIdx]}`;
-            
             tempImg.src = currentPath;
-
             tempImg.onload = function() {
                 if (found) return;
                 found = true;
-                
-                // רק אם התמונה קיימת, יוצרים את האלמנט באתר
                 const item = document.createElement('div');
                 item.className = 'photo-item';
-                const finalImg = document.createElement('img');
-                finalImg.src = currentPath;
-                
-                item.appendChild(finalImg);
+                item.innerHTML = `<img src="${currentPath}">`;
                 item.onclick = () => {
                     document.getElementById('lb-img').src = currentPath;
                     document.getElementById('lightbox').classList.add('active');
                 };
-                
                 gallery.appendChild(item);
                 revealObserver.observe(item);
             };
-
             tempImg.onerror = function() {
                 if (found) return;
-                // עובר לפורמט הבא או לתיקייה הבאה
                 if (fmtIdx < formats.length - 1) {
                     checkPath(folderIdx, fmtIdx + 1);
                 } else {
@@ -113,22 +120,18 @@
                 }
             };
         }
-
         checkPath(0, 0);
     }
 
-    // הרצת הטעינה בסדר שביקשת:
-    // א. מספרים (1 עד 100)
+    // טעינת תמונות
     for (let i = 1; i <= 100; i++) attemptLoad(i);
-    // ב. אותיות (א' עד ס')
     letters.forEach(l => attemptLoad(l));
-    // ג. מיוחדים
-    ["proposal", "beach"].forEach(s => attemptLoad(s));
+    ["proposal", "beach", "wedding"].forEach(s => attemptLoad(s));
 
     // כוכבים
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 60; i++) {
         const s = document.createElement('div');
-        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.3;`;
+        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.3; border-radius:50%;`;
         document.getElementById('stars-container').appendChild(s);
     }
 </script>
