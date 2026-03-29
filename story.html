@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>הסיפור שלנו - יוקרת זכוכית Ultra</title>
+    <title>הסיפור שלנו - יוקרה צבעונית Side-by-Side</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Cinzel+Decorative:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,600;1,300;1,600&display=swap" rel="stylesheet">
     
@@ -12,12 +12,12 @@
     <style>
         :root {
             --dark-bg: #030303;
-            --glass-bg: rgba(20, 20, 20, 0.4);
+            --glass-bg: rgba(25, 25, 25, 0.5);
             --glass-border: rgba(255, 255, 255, 0.08);
             --gold: #d4af37;
             --gold-bright: #ffdf7e;
             --soft-white: #f5f5f5;
-            --blur: blur(20px) saturate(190%);
+            --blur: blur(20px) saturate(180%);
             --shadow-glass: 0 15px 35px rgba(0, 0, 0, 0.4);
         }
 
@@ -32,36 +32,25 @@
             color: var(--soft-white);
             font-family: 'Assistant', sans-serif;
             overflow-x: hidden;
-            /* רקע עם "נצנוצים" עדינים */
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
-                radial-gradient(circle at 80% 90%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
-                url('https://www.transparenttextures.com/patterns/dark-dotted-2.png');
+            background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000 100%);
         }
 
-        /* --- הדר דרמטי Ultra --- */
+        /* --- הדר דרמטי --- */
         header {
-            height: 90vh;
+            height: 60vh;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            text-align: center; background: radial-gradient(circle, #1a1a1a 0%, #000 100%);
-            position: relative;
-        }
-
-        header::before {
-            content: ''; position: absolute; width: 100%; height: 100%;
-            background: url('https://images.unsplash.com/photo-1519225421980-715cb0215aed?q=80&w=2000') no-repeat center center/cover;
-            opacity: 0.12; filter: grayscale(100%);
+            text-align: center; position: relative;
         }
 
         header h1 {
-            font-family: 'Cinzel Decorative', serif; font-size: 6rem;
+            font-family: 'Cinzel Decorative', serif; font-size: clamp(3rem, 10vw, 6rem);
             color: var(--gold); margin: 0; text-shadow: 0 0 30px rgba(212, 175, 55, 0.6);
             z-index: 1; letter-spacing: 5px;
             animation: textGlow 3s ease-in-out infinite alternate;
         }
 
         header p {
-            font-family: 'Cormorant Garamond', serif; font-size: 2.2rem; font-style: italic;
+            font-family: 'Cormorant Garamond', serif; font-size: clamp(1.5rem, 5vw, 2.2rem); font-style: italic;
             z-index: 1; opacity: 0.8; margin-top: 15px;
         }
 
@@ -72,12 +61,12 @@
 
         /* --- ציר הזמן (הסיפור) --- */
         #story-timeline {
-            max-width: 1400px; margin: 0 auto; padding: 100px 20px;
+            max-width: 1400px; margin: 0 auto; padding: 50px 20px;
         }
 
         .story-row {
             display: flex; align-items: center; justify-content: center;
-            margin-bottom: 180px; gap: 100px;
+            margin-bottom: 100px; gap: 5vw; /* מרווח יחסי */
             position: relative;
         }
 
@@ -85,108 +74,91 @@
 
         /* אפקט ה-Glassmorphism Ultra לקארד */
         .text-box {
-            flex: 0 0 42%; padding: 60px;
+            flex: 0 0 45%; padding: 40px;
             background: var(--glass-bg); backdrop-filter: var(--blur);
-            border-radius: 25px; border: 1px solid var(--glass-border);
+            border-radius: 20px; border: 1px solid var(--glass-border);
             box-shadow: var(--shadow-glass); position: relative; z-index: 2;
-            transition: transform 0.4s ease, border-color 0.4s ease;
-            overflow: hidden; /* מסגרת חיה */
+            transition: 0.4s ease;
         }
-
-        /* אפקט מסגרת חיה ב-Hover */
-        .text-box::before {
-            content: ''; position: absolute; top: 0; left: -100%;
-            width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.1), transparent);
-            transition: left 0.8s ease;
-        }
-
-        .text-box:hover::before { left: 100%; }
 
         /* עיצוב התאריכים */
-        .date-container { margin-bottom: 25px; }
-        .hebrew-date { font-family: 'Assistant'; color: var(--gold-bright); font-size: 1.5rem; font-weight: 700; display: block; }
-        .latin-date { font-size: 1rem; color: #888; display: block; margin-top: 5px; }
+        .date-container { margin-bottom: 20px; }
+        .hebrew-date { font-family: 'Assistant'; color: var(--gold-bright); font-size: 1.3rem; font-weight: 700; display: block; }
+        .latin-date { font-size: 0.9rem; color: #888; display: block; margin-top: 3px; }
 
         /* כותרת הפרק */
         .text-box h2 {
-            font-family: 'Cinzel Decorative', serif; font-size: 3rem;
-            color: #fff; margin: 0 0 25px; line-height: 1.1;
+            font-family: 'Cinzel Decorative', serif; font-size: clamp(1.8rem, 4vw, 2.8rem);
+            color: #fff; margin: 0 0 20px; line-height: 1.1;
         }
 
         /* תיאור הפרק */
         .text-box p {
-            font-size: 1.15rem; line-height: 2; color: #ddd; margin-top: 25px;
+            font-size: 1.1rem; line-height: 1.8; color: #ddd; margin-top: 20px;
         }
 
-        /* אפקט התמונה הדרמטית עם תנועה */
+        /* אפקט התמונה הדרמטית - צבעונית מההתחלה */
         .image-box {
-            flex: 0 0 42%; overflow: hidden; border-radius: 25px;
-            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.8);
-            transition: transform 0.8s cubic-bezier(0.2, 1, 0.2, 1);
+            flex: 0 0 45%; overflow: hidden; border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+            transition: 0.6s cubic-bezier(0.2, 1, 0.2, 1);
             position: relative;
         }
 
         .image-box img {
-            width: 100%; height: 550px; object-fit: cover; display: block;
-            filter: grayscale(100%); transition: filter 1s ease, transform 1s ease;
+            width: 100%; height: 500px; object-fit: cover; display: block;
+            filter: grayscale(0%); /* צבעוני מההתחלה */
+            transition: transform 1s ease;
         }
 
-        /* הובר על כל השורה - אפקטים ויזואליים */
-        .story-row:hover .image-box { transform: scale(1.03) translateY(-15px); }
-        .story-row:hover .image-box img { filter: grayscale(0%); transform: scale(1.08); }
-        .story-row:hover .text-box { transform: scale(1.01); border-color: var(--gold); box-shadow: 0 20px 50px rgba(212, 175, 55, 0.15); }
+        /* הובר על כל השורה - רק הגדלה קלה, ללא שינוי צבע */
+        .story-row:hover .image-box img { transform: scale(1.05); }
+        .story-row:hover .text-box { border-color: var(--gold); box-shadow: 0 15px 40px rgba(212, 175, 55, 0.15); }
 
-        /* --- פיצ'ר חדש: טיימר לאחור (Countdown) יוקרתי --- */
+        /* --- פיצ'ר: טיימר לאחור (Countdown) יוקרתי --- */
         #wedding-countdown {
-            height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
+            min-height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center;
             text-align: center; position: relative; overflow: hidden;
             background: radial-gradient(circle at center, #111 0%, #000 100%);
+            padding: 40px 20px; box-sizing: border-box;
         }
 
         #wedding-countdown h2 {
-            font-family: 'Cinzel Decorative', serif; font-size: clamp(2rem, 6vw, 4rem);
+            font-family: 'Cinzel Decorative', serif; font-size: clamp(2.2rem, 6vw, 4rem);
             background: linear-gradient(135deg, #fff 0%, var(--gold) 50%, #fff 100%);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-shadow: 0 0 30px rgba(212, 175, 55, 0.4); margin-bottom: 60px;
+            text-shadow: 0 0 30px rgba(212, 175, 55, 0.4); margin-bottom: 40px;
         }
 
         .timer-container {
-            display: flex; gap: clamp(10px, 4vw, 30px);
+            display: flex; gap: 15px;
             background: var(--glass-bg); backdrop-filter: var(--blur);
-            padding: 40px; border-radius: 30px; border: 1px solid var(--glass-border);
-            box-shadow: var(--shadow-glass);
+            padding: 30px; border-radius: 25px; border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-glass); width: 100%; max-width: 600px; justify-content: center;
         }
 
-        .timer-block { text-align: center; flex: 0 0 calc(25% - 20px); }
+        .timer-block { text-align: center; flex: 1; min-width: 70px; }
         .timer-block span {
-            font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 10vw, 6rem);
+            font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 8vw, 5rem);
             font-weight: 200; color: #fff; display: block;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.3);
         }
-        .timer-block p { font-size: 1rem; color: var(--gold); margin-top: 10px; font-weight: 600; }
+        .timer-block p { font-size: 0.9rem; color: var(--gold); margin-top: 5px; font-weight: 600; text-transform: uppercase; }
 
         /* --- כפתור הוספה צף Ultra --- */
         .add-btn-fixed {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            padding: 20px 60px; background: transparent; color: var(--gold);
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            padding: 15px 40px; background: transparent; color: var(--gold);
             border: 2px solid var(--gold); font-family: 'Cinzel Decorative', serif;
-            font-size: 1.2rem; border-radius: 50px; cursor: pointer; z-index: 1000;
+            font-size: 1.1rem; border-radius: 50px; cursor: pointer; z-index: 1000;
             transition: 0.5s ease; position: relative; overflow: hidden;
-        }
-
-        .add-btn-fixed::after {
-            content: ''; position: absolute; top: -50%; left: -50%;
-            width: 200%; height: 200%; background: rgba(255, 255, 255, 0.1);
-            transform: rotate(45deg); transition: transform 0.8s ease;
+            white-space: nowrap;
         }
 
         .add-btn-fixed:hover {
             background: var(--gold); color: #000;
-            box-shadow: 0 0 40px rgba(212, 175, 55, 0.6);
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
         }
-
-        .add-btn-fixed:hover::after { transform: rotate(45deg) translate(50%, 50%); }
 
         /* --- מודאל העלאה Ultra (Modal) --- */
         #upload-modal {
@@ -196,65 +168,68 @@
         }
 
         .modal-content {
-            background: var(--glass-bg); padding: 50px; border-radius: 30px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.7); width: 90%; max-width: 550px;
-            border: 1px solid var(--gold);
+            background: var(--glass-bg); padding: 40px; border-radius: 25px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.7); width: 90%; max-width: 500px;
+            border: 1px solid var(--gold); max-height: 90vh; overflow-y: auto;
         }
 
         .modal-content h3 {
             font-family: 'Cinzel Decorative', serif; color: var(--gold-bright);
-            text-align: center; margin: 0 0 30px; font-size: 2.2rem;
+            text-align: center; margin: 0 0 25px; font-size: 2rem;
         }
 
         .modal-content input, .modal-content textarea {
-            width: 100%; padding: 18px; margin: 15px 0;
+            width: 100%; padding: 15px; margin: 12px 0;
             background: rgba(255, 255, 255, 0.04); color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 10px;
             font-family: 'Assistant', sans-serif; box-sizing: border-box;
-            font-size: 1.1rem;
-        }
-
-        .modal-content input:focus, .modal-content textarea:focus {
-            outline: none; border-color: var(--gold); background: rgba(212, 175, 55, 0.08);
-        }
-
-        /* שדה תאריך מיוחד לתצוגה הכהה */
-        .modal-content input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1) sepia(100%) saturate(1000%) hue-rotate(10deg);
-            cursor: pointer;
+            font-size: 1rem;
         }
 
         .submit-btn {
             width: 100%; background: var(--gold); color: #000;
-            border: none; padding: 22px; border-radius: 12px; cursor: pointer;
-            font-family: 'Cinzel Decorative', serif; font-size: 1.2rem;
-            transition: 0.4s; margin-top: 25px;
+            border: none; padding: 18px; border-radius: 10px; cursor: pointer;
+            font-family: 'Cinzel Decorative', serif; font-size: 1.1rem;
+            transition: 0.4s; margin-top: 20px;
         }
 
         .submit-btn:hover { background: #fff; box-shadow: 0 0 25px rgba(255, 255, 255, 0.4); }
 
-        /* --- רספונסיביות מוחלטת לנייד --- */
-        @media (max-width: 1024px) {
-            .story-row, .story-row:nth-child(even) { flex-direction: column; gap: 50px; margin-bottom: 120px; text-align: center; }
-            .image-box, .text-box { flex: 0 0 100%; width: 100%; }
-            .image-box img { height: 400px; }
-            header h1 { font-size: 3.5rem; }
-            #wedding-countdown h2 { font-size: 2.2rem; }
-            .timer-container { padding: 20px; gap: 15px; }
-            .timer-block span { font-size: 3rem; }
-        }
-
-        @media (max-width: 600px) {
-            header h1 { font-size: 2.8rem; letter-spacing: 2px; }
-            header p { font-size: 1.5rem; }
-            .text-box h2 { font-size: 2.2rem; }
-            .add-btn-fixed { font-size: 1rem; padding: 15px 40px; bottom: 20px; }
+        /* --- התאמה רספונסיבית מיוחדת לנייד --- */
+        @media (max-width: 768px) {
+            header { height: 50vh; }
+            #story-timeline { padding: 30px 10px; }
+            
+            .story-row, .story-row:nth-child(even) { 
+                flex-direction: row !important; /* שומר על טור אחד ליד השני */
+                gap: 10px; /* צמצום המרווח */
+                margin-bottom: 60px;
+                align-items: flex-start; /* יישור לחלק העליון */
+            }
+            
+            .image-box, .text-box { 
+                flex: 0 0 calc(50% - 5px); /* רוחב חצי-חצי פחות המרווח */
+                width: calc(50% - 5px);
+                padding: 15px; /* צמצום ה-Padding הפנימי */
+                border-radius: 12px; /* פינות חדות יותר */
+            }
+            
+            .image-box img { 
+                height: 200px; /* הקטנת גובה התמונה משמעותית */
+            }
+            
+            .hebrew-date { font-size: 1rem; }
+            .latin-date { font-size: 0.8rem; }
+            .text-box h2 { font-size: 1.3rem; margin-bottom: 10px; }
+            .text-box p { font-size: 0.9rem; line-height: 1.6; margin-top: 10px; }
+            
+            .add-btn-fixed { font-size: 0.9rem; padding: 12px 30px; bottom: 15px; }
+            .modal-content { padding: 25px; }
+            .modal-content h3 { font-size: 1.6rem; }
         }
     </style>
 </head>
 <body>
-
-    <div style="position:fixed; top:0; left:0; width:100%; height:100%; z-index:-1; opacity:0.3; background:url('https://www.transparenttextures.com/patterns/dark-dotted-2.png');"></div>
 
     <header data-aos="fade">
         <h1 data-aos="zoom-out" data-aos-delay="200">הסיפור שלנו</h1>
@@ -284,7 +259,7 @@
                 <p>שניות</p>
             </div>
         </div>
-        <p style="font-family:'Cormorant Garamond'; font-size:1.8rem; font-style:italic; margin-top:40px; color:#fff;">עד לפרק הבא ביחד: החתונה שלנו 15.06.2026</p>
+        <p style="font-family:'Cormorant Garamond'; font-size: clamp(1.2rem, 4vw, 1.8rem); font-style:italic; margin-top:30px; color:#fff; padding: 0 20px;">עד לפרק הבא ביחד: החתונה שלנו 15.06.2026</p>
     </div>
 
     <button class="add-btn-fixed" onclick="openModal()">+ הוסף רגע חדש</button>
@@ -303,12 +278,11 @@
             <p style="font-size: 0.8rem; color: #888; text-align: center;">*כאן יהיה בעתיד כפתור העלאת קובץ אמיתי</p>
             
             <button class="submit-btn" id="save-btn" onclick="processNewChapter()">פרסם לסיפור</button>
-            <button onclick="closeModal()" style="background: none; border: none; color: #999; width: 100%; margin-top: 25px; cursor: pointer; font-size: 1.1rem;">ביטול</button>
+            <button onclick="closeModal()" style="background: none; border: none; color: #999; width: 100%; margin-top: 25px; cursor: pointer; font-size: 1rem;">ביטול</button>
         </div>
     </div>
 
     <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/tilt.js/1.2.1/tilt.jquery.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script type="module">
@@ -348,31 +322,29 @@
                 const row = document.createElement('div');
                 row.className = 'story-row';
                 
-                // אפקט זיג-זג חכם
+                // אפקט זיג-זג חכם (ביטול flexDirection ההפוך במובייל)
                 if (counter % 2 !== 0) {
                     row.style.flexDirection = 'row-reverse';
                 }
 
-                // אנימציות AOS כיווניות (Fade מהצד)
+                // אנימציות AOS כיווניות עדינות
                 row.setAttribute('data-aos', counter % 2 === 0 ? 'fade-left' : 'fade-right');
                 
                 row.innerHTML = `
                     <div class="image-box"><img src="${data.img}"></div>
-                    <div class="text-box" data-tilt data-tilt-max="5" data-tilt-speed="400" data-tilt-perspective="1000">
+                    <div class="text-box">
                         <div class="date-container">
                             <span class="hebrew-date">${data.hebDate}</span>
                             <span class="latin-date">${data.latDate}</span>
                         </div>
                         <h2>${data.title}</h2>
-                        <p style="color:#ccc; line-height: 1.8;">${data.desc}</p>
+                        <p>${data.desc}</p>
                     </div>
                 `;
                 timeline.appendChild(row);
                 counter++;
             });
             AOS.refresh();
-            // הפעלת אפקט Tilt על האלמנטים החדשים
-            $('.text-box').tilt({ maxTilt: 5, perspective: 1000 });
         }
 
         // העלאה ושמירה
@@ -411,7 +383,7 @@
                 location.reload();
             } catch (e) {
                 console.error(e);
-                alert("קרתה שגיאה. וודא שביצעת את כל השלבים ב-Firebase.");
+                alert("קרתה שגיאה בהעלאה. וודא שביצעת את כל השלבים ב-Firebase.");
                 btn.disabled = false;
                 btn.innerText = "פרסם לסיפור";
             }
@@ -429,10 +401,12 @@
             const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            document.getElementById("days").innerText = days.toString().padStart(2, '0');
-            document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
-            document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
-            document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
+            if (document.getElementById("days")) {
+                document.getElementById("days").innerText = days.toString().padStart(2, '0');
+                document.getElementById("hours").innerText = hours.toString().padStart(2, '0');
+                document.getElementById("minutes").innerText = minutes.toString().padStart(2, '0');
+                document.getElementById("seconds").innerText = seconds.toString().padStart(2, '0');
+            }
         }
 
         setInterval(updateCountdown, 1000);
@@ -442,11 +416,10 @@
     </script>
 
     <script>
-        // אתחול AOS עם הגדרות יוקרה
+        // אתחול AOS עדין
         AOS.init({ 
-            duration: 1200, 
-            once: false, // אנימציה תקרה בכל גלילה
-            mirror: true // אנימציה גם כשגוללים חזרה למעלה
+            duration: 1000, 
+            once: true, // אנימציה תקרה רק פעם אחת
         });
     </script>
 </body>
