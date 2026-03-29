@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>הסיפור שלנו - Boutique Edition</title>
+    <title>הסיפור שלנו - Signature Edition</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600&family=Playfair+Display:ital,wght@0,700;1,400&family=Tinos:ital@1&family=Amatic+SC:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
     <style>
         :root {
-            --dark-bg: #050505;
-            --glass: rgba(20, 20, 20, 0.9);
+            --dark-bg: #030303;
+            --glass: rgba(15, 15, 15, 0.95);
             --gold: #d4af37;
             --gold-light: #f1d592;
             --text: #f0f0f0;
@@ -20,27 +20,44 @@
         body {
             margin: 0; padding: 0; background-color: var(--dark-bg); color: var(--text);
             font-family: 'Assistant', sans-serif; overflow-x: hidden;
-            background-image: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%);
+            background-image: radial-gradient(circle at top, #151515 0%, #030303 100%);
         }
 
+        /* הדר יוקרתי עם כתיבה חיה */
         header {
-            height: 25vh; display: flex; flex-direction: column; justify-content: center;
+            height: 35vh; display: flex; flex-direction: column; justify-content: center;
             align-items: center; text-align: center;
         }
 
         header h1 {
-            font-family: 'Cinzel Decorative', serif; font-size: 2.5rem;
-            color: var(--gold); margin: 0;
-            text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+            font-family: 'Playfair Display', serif; font-size: 3.2rem;
+            color: var(--gold); margin: 0; letter-spacing: 4px;
+            text-transform: uppercase;
         }
 
-        #story-timeline { max-width: 900px; margin: 0 auto; padding: 15px; padding-bottom: 50px; }
+        /* אנימציית כתיבה ידנית */
+        .signature {
+            font-family: 'Amatic SC', cursive; font-size: 2.2rem;
+            color: var(--gold-light); margin-top: 5px;
+            white-space: nowrap; overflow: hidden;
+            width: 0; /* מתחיל מאפס */
+            animation: typing 2.5s steps(20, end) forwards;
+            animation-delay: 0.8s;
+            border-left: 2px solid transparent; /* סמן כתיבה אם תרצה */
+        }
 
-        /* הכרטיס עם פס הזהב הרודף */
+        @keyframes typing {
+            from { width: 0; }
+            to { width: 180px; } /* התאם לפי אורך השם */
+        }
+
+        #story-timeline { max-width: 850px; margin: 0 auto; padding: 15px; padding-bottom: 50px; }
+
+        /* כרטיס עם פס זהב מסתובב */
         .story-card, .next-chapter-card {
             display: flex; position: relative; overflow: hidden;
-            border-radius: 25px; margin-bottom: 50px; padding: 2px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            border-radius: 25px; margin-bottom: 50px; padding: 1.5px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.9);
         }
 
         .story-card::before, .next-chapter-card::before {
@@ -56,80 +73,66 @@
         }
 
         .card-inner {
-            display: flex; width: 100%; background: #0a0a0a;
+            display: flex; width: 100%; background: #080808;
             border-radius: 23px; overflow: hidden; position: relative; z-index: 1;
         }
 
-        /* במחשב: תמונה בצד */
-        @media (min-width: 769px) {
-            .card-inner { min-height: 250px; }
-            .story-card:nth-child(even) .card-inner { flex-direction: row-reverse; }
-            .image-box { flex: 0 0 40%; }
+        /* אלומת אור על התמונה */
+        .image-box { position: relative; overflow: hidden; flex: 0 0 40%; }
+        
+        .image-box::after {
+            content: ''; position: absolute; top: 0; left: -100%;
+            width: 50%; height: 100%;
+            background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+            transform: skewX(-25deg);
+            animation: imageShine 5s infinite;
         }
 
-        /* במובייל: תמונה למעלה וסידור מדורג */
-        @media (max-width: 768px) {
-            .card-inner { flex-direction: column !important; }
-            .image-box { width: 100%; height: 250px; }
-            
-            /* סדר מדורג: פעם יישור לימין, פעם לשמאל */
-            .story-card:nth-child(even) .text-box { text-align: left; align-items: flex-start; }
-            .story-card:nth-child(odd) .text-box { text-align: right; align-items: flex-end; }
-            
-            .text-box h2 { font-size: 1.5rem; }
+        @keyframes imageShine {
+            0% { left: -150%; }
+            30% { left: 150%; }
+            100% { left: 150%; }
         }
 
         .image-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+        /* טקסט ועיצוב */
         .text-box { flex: 1; padding: 25px; display: flex; flex-direction: column; justify-content: center; }
+        .hebrew-date { color: var(--gold-light); font-weight: 600; font-size: 0.85rem; }
+        .latin-date { font-size: 0.7rem; color: #444; margin-bottom: 5px; }
+        .text-box h2 { font-family: 'Playfair Display', serif; font-size: 1.6rem; color: var(--gold); margin: 8px 0; }
+        .text-box p { font-size: 0.95rem; line-height: 1.6; color: #bbb; }
 
-        .hebrew-date { color: var(--gold-light); font-weight: 600; font-size: 0.9rem; }
-        .latin-date { font-size: 0.75rem; color: #555; margin-bottom: 8px; }
-
-        .text-box h2 {
-            font-family: 'Cinzel Decorative', serif; font-size: 1.8rem;
-            color: var(--gold); margin: 10px 0;
+        @media (max-width: 768px) {
+            .card-inner { flex-direction: column !important; }
+            .image-box { width: 100%; height: 240px; }
+            .story-card:nth-child(even) .text-box { text-align: left; }
+            .story-card:nth-child(odd) .text-box { text-align: right; }
+            header h1 { font-size: 2.2rem; }
+            .signature { font-size: 1.8rem; }
         }
 
-        .text-box p { font-size: 1rem; line-height: 1.6; color: #ccc; margin: 0; }
-
         /* באנר הפרק הבא */
-        .next-chapter-card { cursor: pointer; }
         .next-chapter-inner {
-            background: linear-gradient(135deg, #0d0d0d 0%, #1a1a1a 100%);
+            background: linear-gradient(135deg, #0a0a0a 0%, #151515 100%);
             display: flex; align-items: center; width: 100%; padding: 40px;
             border-radius: 23px; position: relative; z-index: 1; justify-content: center;
         }
-
-        .question-mark {
-            font-family: 'Cinzel Decorative', serif; font-size: 3.5rem;
-            color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.6);
-            margin-left: 20px;
-        }
-
-        .next-text { font-family: 'Cinzel Decorative', serif; font-size: 1.6rem; color: #fff; text-align: center; }
-
-        /* מודאל העלאה */
-        #upload-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.96); backdrop-filter: blur(12px); z-index: 2000;
-            justify-content: center; align-items: center;
-        }
-        .modal-content { background: #111; padding: 30px; border-radius: 25px; width: 85%; max-width: 420px; border: 1px solid var(--gold); }
-        input, textarea { width: 100%; padding: 14px; margin: 10px 0; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 12px; box-sizing: border-box; font-family: 'Assistant'; }
-        .submit-btn { width: 100%; background: var(--gold); color: #000; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 1.1rem; }
+        .question-mark { font-family: 'Playfair Display', serif; font-size: 3rem; color: var(--gold); margin-left: 15px; }
+        .next-text { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #fff; }
     </style>
 </head>
 <body>
 
-    <header data-aos="zoom-in">
-        <h1>הסיפור שלנו</h1>
+    <header>
+        <h1 data-aos="fade-down">הסיפור שלנו</h1>
+        <div class="signature">יהונתן & יעל</div>
     </header>
 
     <div id="story-timeline"></div>
 
-    <div id="timeline-footer" style="max-width: 900px; margin: 0 auto; padding: 0 15px 100px;">
-        <div class="next-chapter-card" onclick="openModal()" data-aos="fade-up">
+    <div id="timeline-footer" style="max-width: 850px; margin: 0 auto; padding: 0 15px 120px;">
+        <div class="next-chapter-card" onclick="openModal()" data-aos="zoom-in">
             <div class="next-chapter-inner">
                 <div class="question-mark">?</div>
                 <div class="next-text">אז מה הפרק הבא?</div>
@@ -137,14 +140,14 @@
         </div>
     </div>
 
-    <div id="upload-modal">
-        <div class="modal-content">
-            <h3 style="color: var(--gold); text-align: center; margin-top: 0; font-family: 'Cinzel Decorative';">Add a New Chapter</h3>
-            <input type="text" id="chapter-title" placeholder="כותרת הפרק">
-            <textarea id="chapter-desc" rows="4" placeholder="מה קרה שם?"></textarea>
-            <input type="date" id="chapter-date">
-            <input type="file" id="chapter-file" accept="image/*">
-            <button class="submit-btn" id="save-btn" onclick="processNewChapter()">פרסם לסיפור</button>
+    <div id="upload-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.97); backdrop-filter:blur(15px); z-index:2000; justify-content:center; align-items:center;">
+        <div style="background:#111; padding:30px; border-radius:25px; width:85%; max-width:400px; border:1px solid var(--gold);">
+            <h3 style="color:var(--gold); text-align:center; font-family:'Playfair Display';">הוספת רגע חדש</h3>
+            <input type="text" id="chapter-title" placeholder="כותרת" style="width:100%; padding:12px; margin:10px 0; background:#1a1a1a; color:#fff; border:1px solid #333; border-radius:10px;">
+            <textarea id="chapter-desc" rows="4" placeholder="מה קרה שם?" style="width:100%; padding:12px; margin:10px 0; background:#1a1a1a; color:#fff; border:1px solid #333; border-radius:10px;"></textarea>
+            <input type="date" id="chapter-date" style="width:100%; padding:12px; margin:10px 0; background:#1a1a1a; color:#fff; border:1px solid #333; border-radius:10px;">
+            <input type="file" id="chapter-file" accept="image/*" style="width:100%; padding:12px; margin:10px 0; color:#888;">
+            <button id="save-btn" onclick="processNewChapter()" style="width:100%; background:var(--gold); color:#000; padding:15px; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">פרסם לסיפור</button>
             <button onclick="closeModal()" style="background:none; border:none; color:#555; width:100%; margin-top:15px; cursor:pointer;">ביטול</button>
         </div>
     </div>
