@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>רגעים קסומים | גלריה</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* משתני צבע בסיסיים (כמו בדף הבית) */
+        :root { 
+            --gold: #d4af37; 
+            --bg: #050505; 
+            --glass: rgba(255, 255, 255, 0.03); 
+        }
+        
+        body {
+            font-family: 'Assistant', sans-serif;
+            background-color: var(--bg);
+            color: white; 
+            margin: 0; 
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* רקע כוכבים מנצנצים עדין */
+        #stars-container {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1; 
+            background: radial-gradient(circle at center, #111 0%, #050505 100%);
+        }
+
+        header {
+            padding: 80px 20px 40px; 
+            text-align: center;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.8rem, 10vw, 4.5rem);
+            color: var(--gold); 
+            margin: 0; 
+            font-style: italic;
+            text-shadow: 0 2px 10px rgba(212, 175, 55, 0.3);
+        }
+
+        .sub-title {
+            color: #888; 
+            letter-spacing: 4px; 
+            text-transform: uppercase; 
+            font-size: 0.9rem; 
+            margin-top: 15px;
+        }
+
+        /* --- גריד Masonry חכם --- */
+        .gallery-wrapper {
+            padding: 20px;
+            /* יוצר עמודות שמתאימות את עצמן לרוחב באופן אוטומטי */
+            columns: 4 280px; 
+            column-gap: 15px;
+            max-width: 1600px;
+            margin: 0 auto;
+            padding-bottom: 100px; /* רווח לכפתור החזרה */
+        }
+
+        /* --- עיצוב כרטיס תמונה --- */
+        .photo-item {
+            display: inline-block; /* חובה עבור Masonry */
+            width: 100%;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            background: var(--glass);
+            border: 1px solid rgba(212, 175, 55, 0.1);
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            
+            /* --- הגדרות ראשוניות לאפקט ה-Reveal (חשיפה) --- */
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+            /* מעבר רך ומקצועי */
+            transition: 
+                opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+                transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
+                border-color 0.3s ease,
+                box-shadow 0.3s ease;
+        }
+
+        /* המחלקה שתווסף ע"י ה-JavaScript בזמן גלילה */
+        .photo-item.reveal {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* אפקטים במעבר עכבר (Hover) */
+        .photo-item:hover {
+            border-color: var(--gold);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2);
+            z-index: 10; /* מבטיח שהתמונה תהיה מעל אחרות בזמן ההגדלה */
+        }
+
+        .photo-item img {
+            width: 100%;
+            display: block;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+            filter: grayscale(15%); /* אפקט וינטג' עדין */
+        }
+
+        .photo-item:hover img {
+            filter: grayscale(0%);
+            transform: scale(1.08); /* הגדלה עדינה של התמונה בפנים */
+        }
+
+        /* שכבת זהב שחורה צפה במעבר עכבר */
+        .overlay {
+            position: absolute; 
+            inset: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 60%);
+            opacity: 0; 
+            transition: opacity 0.4s ease;
+            display: flex; 
+            align-items: flex-end; 
+            padding: 20px;
+        }
+        
+        .photo-item:hover .overlay { 
+            opacity: 1; 
+        }
+
+        .zoom-hint {
+            color: var(--gold); 
+            font-size: 0.85rem; 
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* --- לייטבוקס (צפייה במסך מלא) --- */
+        #lightbox {
+            position: fixed; 
+            inset: 0; 
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(15px); 
+            display: none;
+            justify-content: center; 
+            align-items: center; 
+            z-index: 9999;
+            cursor: zoom-out;
+            opacity: 0;
+            transition: opacity 0.4s ease;
+        }
+        
+        #lightbox.active { 
+            display: flex; 
+            opacity: 1;
+        }
+        
+        #lightbox img { 
+            max-width: 90%; 
+            max-height: 85vh; 
+            border: 2px solid var(--gold); 
+            box-shadow: 0 0 50px rgba(0,0,0,0.8);
+            border-radius: 4px;
+        }
+
+        /* --- כפתור חזרה לדף הבית --- */
+        .back-home {
+            position: fixed; 
+            bottom: 30px; 
+            left: 30px;
+            background: rgba(212, 175, 55, 0.9); 
+            color: black; 
+            padding: 12px 28px;
+            border-radius: 50px; 
+            text-decoration: none; 
+            font-weight: bold;
+            font-size: 0.95rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5); 
+            z-index: 100;
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+        
+        .back-home:hover {
+            background: var(--bg);
+            color: var(--gold);
+            border-color: var(--gold);
+            transform: translateY(-3px);
+        }
+
+        /* התאמה למובייל (פחות עמודות) */
+        @media (max-width: 600px) {
+            .gallery-wrapper {
+                columns: 2 150px;
+                column-gap: 10px;
+                padding: 10px;
+            }
+            header { padding: 50px 10px 30px; }
+            .back-home { padding: 10px 20px; bottom: 20px; left: 20px; font-size: 0.85rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div id="stars-container"></div>
+
+<header>
+    <h1>Our Moments</h1>
+    <div class="sub-title">אורן & עדי | הגלריה</div>
+</header>
+
+<div class="gallery-wrapper" id="main-gallery">
+    </div>
+
+<div id="lightbox" onclick="this.classList.remove('active')">
+    <img id="lb-img" src="" alt="תמונה מוגדלת">
+</div>
+
+<a href="index.html" class="back-home">↩ חזרה לדף הבית</a>
+
+<script>
+    // --- 1. רשימת התמונות שלך ---
+    // כאן עליך למלא את השמות המדויקים של הקבצים בתיקיית images.
+    // הקוד תומך בכל פורמט (jpg, png, gif, webp).
+    const photoList = [
+        "1.jpg", "2.jpg", "3.jpg", "4.jpg", "5.jpg", "6.jpg", 
+        "proposal.jpg", "beach.png", "family.jpg", "pre_wedding_1.webp",
+        "7.jpg", "8.jpg"
+        // פשוט תוסיף כאן עוד שמות...
+    ];
+
+    const galleryContainer = document.getElementById('main-gallery');
+
+    // --- 2. הגדרת ה-Intersection Observer (אפקט ה-Reveal) ---
+    // מזהה מתי אלמנט נכנס לתחום הראייה של המסך
+    const revealObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                // הוספת המחלקה שמפעילה את ה-CSS של החשיפה
+                entry.target.classList.add('reveal');
+                // מפסיקים לעקוב אחרי התמונה ברגע שהיא נחשפה (לביצועים טובים יותר)
+                revealObserver.unobserve(entry.target);
+            }
+        });
+    }, {
+        // ההגדרה מתי להפעיל: כשהתמונה נכנסת ב-15% לתוך המסך
+        threshold: 0.15,
+        // הוספת טווח ביטחון קטן מלמטה
+        rootMargin: "0px 0px -50px 0px"
+    });
+
+    // --- 3. טעינה דינמית של התמונות ---
+    photoList.forEach((fileName) => {
+        // יצירת מיכל לכל תמונה
+        const item = document.createElement('div');
+        item.className = 'photo-item';
+        
+        // יצירת ה-HTML הפנימי (תמונה + שכבת Overlay)
+        item.innerHTML = `
+            <img src="images/${fileName}" loading="lazy" alt="רגע קסום מהחתונה">
+            <div class="overlay">
+                <span class="zoom-hint">לחצו להגדלה ✨</span>
+            </div>
+        `;
+
+        // לוגיקה לפתיחת הלייטבוקס בלחיצה
+        item.onclick = () => {
+            const lightboxImg = document.getElementById('lb-img');
+            lightboxImg.src = `images/${fileName}`;
+            document.getElementById('lightbox').classList.add('active');
+        };
+
+        // טיפול בשגיאות טעינה: אם קובץ לא קיים, המיכל שלו פשוט יוסר
+        item.querySelector('img').onerror = () => {
+            item.remove();
+        };
+
+        // הוספת הכרטיס לגלריה
+        galleryContainer.appendChild(item);
+        
+        // חיבור הכרטיס ל-Observer כדי שידע מתי לחשוף אותו
+        revealObserver.observe(item);
+    });
+
+    // --- 4. יצירת כוכבים סטטיים ברקע (עבור הנראות) ---
+    function createBackgroundStars() {
+        const container = document.getElementById('stars-container');
+        for (let i = 0; i < 100; i++) {
+            const star = document.createElement('div');
+            star.style.position = 'absolute';
+            star.style.width = '2px';
+            star.style.height = '2px';
+            star.style.background = 'white';
+            star.style.opacity = Math.random() * 0.7; // שקיפות משתנה
+            star.style.top = Math.random() * 100 + '%';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.borderRadius = '50%';
+            container.appendChild(star);
+        }
+    }
+
+    // הפעלת הכוכבים
+    createBackgroundStars();
+</script>
+
+</body>
+</html>
