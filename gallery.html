@@ -3,27 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יהונתן & יעל | הגלריה המורחבת</title>
+    <title>יהונתן & יעל | רגעים קסומים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
-        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); }
+        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.05); }
         body { font-family: 'Assistant', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; }
-        #stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
+        #stars-container { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
         header { padding: 60px 20px; text-align: center; }
         h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4rem); color: var(--gold); margin: 0; font-style: italic; }
-        .gallery-wrapper { padding: 20px; columns: 4 250px; column-gap: 15px; max-width: 1400px; margin: 0 auto; padding-bottom: 120px; }
+        
+        .gallery-wrapper { 
+            padding: 20px; columns: 4 250px; column-gap: 15px; 
+            max-width: 1400px; margin: 0 auto; padding-bottom: 100px; 
+        }
+
+        /* הגדרה ראשונית - התמונה תופיע רק כשהיא מוכנה */
         .photo-item { 
-            display: inline-block; width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; 
-            background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.1); cursor: pointer;
-            opacity: 0; transform: translateY(30px); transition: all 0.6s ease-out;
+            display: inline-block; width: 100%; margin-bottom: 15px; 
+            border-radius: 8px; overflow: hidden; background: var(--glass); 
+            border: 1px solid rgba(212, 175, 55, 0.1); cursor: pointer;
+            opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out;
         }
         .photo-item.reveal { opacity: 1; transform: translateY(0); }
-        .photo-item img { width: 100%; display: block; transition: 0.5s; }
+        .photo-item img { width: 100%; display: block; transition: 0.4s; }
         .photo-item:hover img { transform: scale(1.05); }
+
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 9999; }
         #lightbox.active { display: flex; }
-        #lightbox img { max-width: 90%; max-height: 80vh; border: 1px solid var(--gold); border-radius: 4px; }
-        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; }
+        #lightbox img { max-width: 90%; max-height: 80vh; border: 1px solid var(--gold); }
+        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; }
         @media (max-width: 600px) { .gallery-wrapper { columns: 2 150px; } }
     </style>
 </head>
@@ -32,7 +40,7 @@
 <div id="stars-container"></div>
 <header>
     <h1>יהונתן & יעל</h1>
-    <p style="color: #888; letter-spacing: 2px;">OUR GALLERY</p>
+    <p style="color: #888;">הגלריה שלנו</p>
 </header>
 
 <div class="gallery-wrapper" id="main-gallery"></div>
@@ -46,25 +54,13 @@
 <script>
     const gallery = document.getElementById('main-gallery');
     
-    // 1. יצירת רשימת אותיות מא' עד ק'
-    const lettersBase = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק"];
-    const allHebrew = [];
-    const units = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"];
+    // 1. הגדרות האותיות (א' עד ס')
+    const letters = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","יא","יב","יג","יד","טו","טז","יז","יח","יט","כ","כא","כב","כג","כד","כה","כו","כז","כח","כט","ל","לא","לב","לג","לד","לה","לו","לז","לח","לט","מ","מא","מב","מג","מד","מה","מו","מז","מח","מט","נ","נא","נב","נג","נד","נה","נו","נז","נח","נט","ס"];
+    
+    const folders = ['images', 'images/1'];
+    const formats = ['jpg', 'png', 'jpeg']; // צמצמנו פורמטים כדי למנוע חסימה מ-GitHub
 
-    // בניית כל הצירופים עד ק'
-    allHebrew.push(...units, "י");
-    units.forEach(u => allHebrew.push("י" + u)); // יא-יט
-    const tens = ["כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
-    tens.forEach(t => {
-        allHebrew.push(t);
-        units.forEach(u => allHebrew.push(t + u));
-    });
-    allHebrew.push("ק");
-
-    const maxNumberedPhotos = 200; 
-    const folders = ["images", "images/1"]; // רשימת התיקיות לחיפוש
-    const formats = ['jpg', 'JPG', 'png', 'PNG', 'heic', 'HEIC', 'jpeg', 'webp'];
-
+    // ה-Observer לחשיפה הדרגתית
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
@@ -74,53 +70,65 @@
         });
     }, { threshold: 0.1 });
 
-    function createPhotoItem(fileName) {
-        const item = document.createElement('div');
-        item.className = 'photo-item';
-        const img = document.createElement('img');
-        
-        let folderIdx = 0;
-        let fmtIdx = 0;
+    // הפונקציה המרכזית - טוענת רק מה שקיים
+    function attemptLoad(fileName) {
+        let found = false;
 
-        // פונקציית חיפוש חכמה בשתי תיקיות ובכל הפורמטים
-        function tryNext() {
-            if (fmtIdx < formats.length) {
-                img.src = `${folders[folderIdx]}/${fileName}.${formats[fmtIdx]}`;
-                fmtIdx++;
-            } else if (folderIdx < folders.length - 1) {
-                folderIdx++;
-                fmtIdx = 0;
-                tryNext();
-            } else {
-                item.remove(); // לא נמצא בשום מקום
-            }
+        // נסיון טעינה שקט בזיכרון
+        function checkPath(folderIdx, fmtIdx) {
+            if (found || folderIdx >= folders.length) return;
+
+            const tempImg = new Image();
+            const currentPath = `${folders[folderIdx]}/${fileName}.${formats[fmtIdx]}`;
+            
+            tempImg.src = currentPath;
+
+            tempImg.onload = function() {
+                if (found) return;
+                found = true;
+                
+                // רק אם התמונה קיימת, יוצרים את האלמנט באתר
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                const finalImg = document.createElement('img');
+                finalImg.src = currentPath;
+                
+                item.appendChild(finalImg);
+                item.onclick = () => {
+                    document.getElementById('lb-img').src = currentPath;
+                    document.getElementById('lightbox').classList.add('active');
+                };
+                
+                gallery.appendChild(item);
+                revealObserver.observe(item);
+            };
+
+            tempImg.onerror = function() {
+                if (found) return;
+                // עובר לפורמט הבא או לתיקייה הבאה
+                if (fmtIdx < formats.length - 1) {
+                    checkPath(folderIdx, fmtIdx + 1);
+                } else {
+                    checkPath(folderIdx + 1, 0);
+                }
+            };
         }
 
-        img.onerror = tryNext;
-        tryNext();
-
-        item.appendChild(img);
-        item.onclick = () => {
-            document.getElementById('lb-img').src = img.src;
-            document.getElementById('lightbox').classList.add('active');
-        };
-        
-        gallery.appendChild(item);
-        revealObserver.observe(item);
+        checkPath(0, 0);
     }
 
-    // --- הרצת הטעינה ---
-    // 1. מספרים (מ-200 עד 1)
-    for (let i = maxNumberedPhotos; i >= 1; i--) createPhotoItem(i);
-    // 2. אותיות עבריות (א' עד ק')
-    allHebrew.forEach(letter => createPhotoItem(letter));
-    // 3. שמות מיוחדים
-    ["proposal", "beach", "wedding"].forEach(name => createPhotoItem(name));
+    // הרצת הטעינה בסדר שביקשת:
+    // א. מספרים (1 עד 100)
+    for (let i = 1; i <= 100; i++) attemptLoad(i);
+    // ב. אותיות (א' עד ס')
+    letters.forEach(l => attemptLoad(l));
+    // ג. מיוחדים
+    ["proposal", "beach"].forEach(s => attemptLoad(s));
 
     // כוכבים
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
-        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.4; border-radius:50%;`;
+        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.3;`;
         document.getElementById('stars-container').appendChild(s);
     }
 </script>
