@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>הסיפור שלנו - Glass Shine Edition</title>
+    <title>הסיפור שלנו - Gold Frame Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
@@ -11,9 +11,9 @@
     <style>
         :root {
             --dark-bg: #050505;
-            --glass: rgba(255, 255, 255, 0.04);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(20, 20, 20, 0.8);
             --gold: #d4af37;
+            --gold-light: #f1d592;
             --text: #f0f0f0;
         }
 
@@ -24,100 +24,97 @@
         }
 
         header {
-            height: 30vh; display: flex; flex-direction: column; justify-content: center;
+            height: 25vh; display: flex; flex-direction: column; justify-content: center;
             align-items: center; text-align: center;
         }
 
         header h1 {
-            font-family: 'Cinzel Decorative', serif; font-size: 2.2rem;
+            font-family: 'Cinzel Decorative', serif; font-size: 2.5rem;
             color: var(--gold); margin: 0;
         }
 
-        #story-timeline { max-width: 900px; margin: 0 auto; padding: 15px; padding-bottom: 120px; }
+        #story-timeline { max-width: 800px; margin: 0 auto; padding: 15px; padding-bottom: 50px; }
 
-        /* כרטיס עם גובה גמיש ואפקט אור */
-        .story-card {
-            display: flex; align-items: stretch; 
-            background: var(--glass); backdrop-filter: blur(12px);
-            border: 1px solid var(--glass-border); border-radius: 22px;
-            margin-bottom: 30px; overflow: hidden;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
-            position: relative; /* בשביל אפקט האור */
-            min-height: 180px;
+        /* כרטיס עם אנימציית פס זהב מסתובב */
+        .story-card, .next-chapter-card {
+            display: flex; align-items: center; 
+            background: var(--glass); backdrop-filter: blur(15px);
+            border-radius: 20px; margin-bottom: 40px; 
+            position: relative; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6);
+            padding: 2px; /* מרווח לפס הזהב */
         }
 
-        .story-card:nth-child(even) { flex-direction: row-reverse; }
-
-        /* אפקט ה"אור" שזז על הבאנר */
-        .story-card::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: -150%;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(
-                to right, 
-                transparent, 
-                rgba(255, 255, 255, 0.08), 
-                transparent
-            );
-            transform: skewX(-25deg);
-            animation: shine 4s infinite;
+        /* האנימציה של הפס שרץ מסביב */
+        .story-card::before, .next-chapter-card::before {
+            content: ''; position: absolute; top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(transparent, transparent, transparent, var(--gold));
+            animation: rotateBorder 4s linear infinite;
         }
 
-        @keyframes shine {
-            0% { left: -150%; }
-            50% { left: 150%; }
-            100% { left: 150%; }
+        @keyframes rotateBorder {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        .image-box { flex: 0 0 38%; position: relative; z-index: 1; }
-        .image-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
-
-        .text-box { 
-            flex: 1; padding: 20px; display: flex; flex-direction: column; 
-            justify-content: center; z-index: 1;
+        /* שכבת התוכן הפנימית כדי שלא יראו את מרכז האנימציה */
+        .card-inner {
+            display: flex; width: 100%; height: 100%;
+            background: #0a0a0a; border-radius: 18px;
+            overflow: hidden; position: relative; z-index: 1;
         }
 
-        .hebrew-date { color: var(--gold); font-weight: 600; font-size: 0.9rem; display: block; }
-        .latin-date { font-size: 0.7rem; color: #777; display: block; margin-bottom: 8px; }
+        .story-card:nth-child(even) .card-inner { flex-direction: row-reverse; }
 
+        /* טיפול בתמונה - לא גזורה ולא מרוחה */
+        .image-box { flex: 0 0 35%; display: flex; align-items: center; background: #000; }
+        .image-box img { width: 100%; height: auto; object-fit: contain; display: block; }
+
+        .text-box { flex: 1; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
+
+        .hebrew-date { color: var(--gold-light); font-weight: 600; font-size: 0.85rem; }
+        .latin-date { font-size: 0.7rem; color: #555; margin-bottom: 5px; }
+
+        /* כותרת בצהוב/זהב */
         .text-box h2 {
-            font-family: 'Cinzel Decorative', serif; font-size: 1.2rem;
-            color: #fff; margin: 5px 0;
+            font-family: 'Cinzel Decorative', serif; font-size: 1.3rem;
+            color: var(--gold); margin: 8px 0;
         }
 
-        .text-box p { 
-            font-size: 0.95rem; line-height: 1.5; color: #ccc; margin: 0;
-            /* ביטלנו את החיתוך - עכשיו רואים הכל */
+        .text-box p { font-size: 0.95rem; line-height: 1.6; color: #ccc; margin: 0; }
+
+        /* באנר "מה הפרק הבא" */
+        .next-chapter-card { cursor: pointer; border: none; background: none; width: 100%; padding: 2px; }
+        .next-chapter-inner {
+            background: linear-gradient(135deg, #111 0%, #1a1a1a 100%);
+            display: flex; align-items: center; width: 100%; padding: 25px;
+            border-radius: 18px; position: relative; z-index: 1;
         }
 
-        /* כפתור הוספה */
-        .add-btn-fixed {
-            position: fixed; bottom: 35px; left: 35px;
-            width: 55px; height: 55px; background: var(--gold); color: #000;
-            border: none; border-radius: 50%; cursor: pointer; z-index: 1000;
-            box-shadow: 0 10px 20px rgba(212,175,55,0.3);
-            font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
+        .question-mark {
+            font-family: 'Cinzel Decorative', serif; font-size: 3.5rem;
+            color: var(--gold); text-shadow: 0 0 20px rgba(212,175,55,0.8);
+            margin-left: 25px; flex: 0 0 60px; text-align: center;
         }
+
+        .next-text { font-family: 'Cinzel Decorative', serif; font-size: 1.5rem; color: #fff; }
 
         /* מודאל */
         #upload-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); z-index: 2000;
+            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 2000;
             justify-content: center; align-items: center;
         }
-        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 25px; width: 85%; max-width: 400px; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #252525; color: #fff; border: 1px solid #333; border-radius: 10px; box-sizing: border-box; }
-        .submit-btn { width: 100%; background: var(--gold); color: #000; padding: 15px; border: none; border-radius: 10px; font-weight: bold; }
+        .modal-content { background: #111; padding: 25px; border-radius: 25px; width: 85%; max-width: 400px; border: 1px solid var(--gold); }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #1a1a1a; color: #fff; border: 1px solid #333; border-radius: 10px; box-sizing: border-box; }
+        .submit-btn { width: 100%; background: var(--gold); color: #000; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
 
         @media (max-width: 600px) {
-            .story-card { min-height: 150px; }
-            .image-box { flex: 0 0 35%; }
+            .image-box { flex: 0 0 30%; }
             .text-box { padding: 15px; }
-            .text-box h2 { font-size: 1.1rem; }
-            .text-box p { font-size: 0.85rem; }
+            .next-text { font-size: 1.2rem; }
+            .question-mark { font-size: 2.5rem; }
         }
     </style>
 </head>
@@ -125,12 +122,19 @@
 
     <header data-aos="fade">
         <h1>הסיפור שלנו</h1>
-        <p style="letter-spacing: 2px; font-size: 0.8rem; opacity: 0.5;">A JOURNEY OF LOVE</p>
     </header>
 
-    <div id="story-timeline"></div>
+    <div id="story-timeline">
+        </div>
 
-    <button class="add-btn-fixed" onclick="openModal()">+</button>
+    <div id="timeline-footer" style="max-width: 800px; margin: 0 auto; padding: 0 15px 100px;">
+        <div class="next-chapter-card" onclick="openModal()" data-aos="zoom-in">
+            <div class="next-chapter-inner">
+                <div class="question-mark">?</div>
+                <div class="next-text">אז מה הפרק הבא ?</div>
+            </div>
+        </div>
+    </div>
 
     <div id="upload-modal">
         <div class="modal-content">
@@ -177,16 +181,17 @@
                 const data = doc.data();
                 const card = document.createElement('div');
                 card.className = 'story-card';
-                if (counter % 2 !== 0) card.style.flexDirection = 'row-reverse';
-                
                 card.setAttribute('data-aos', 'fade-up');
+                
                 card.innerHTML = `
-                    <div class="image-box"><img src="${data.img}"></div>
-                    <div class="text-box">
-                        <span class="hebrew-date">${data.hebDate}</span>
-                        <span class="latin-date">${data.latDate}</span>
-                        <h2>${data.title}</h2>
-                        <p>${data.desc}</p>
+                    <div class="card-inner">
+                        <div class="image-box"><img src="${data.img}"></div>
+                        <div class="text-box">
+                            <span class="hebrew-date">${data.hebDate}</span>
+                            <span class="latin-date">${data.latDate}</span>
+                            <h2>${data.title}</h2>
+                            <p>${data.desc}</p>
+                        </div>
                     </div>
                 `;
                 timeline.appendChild(card);
@@ -209,7 +214,6 @@
                 const storageRef = ref(storage, 'uploads/' + Date.now() + "_" + file.name);
                 await uploadBytes(storageRef, file);
                 const imgUrl = await getDownloadURL(storageRef);
-
                 const [y, m, d] = latinDate.split('-');
                 const res = await fetch(`https://www.hebcal.com/converter?cfg=json&gy=${y}&gm=${m}&gd=${d}&g2h=1`);
                 const dateData = await res.json();
