@@ -6,62 +6,49 @@
     <title>יהונתן & יעל | רגעים קסומים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
-        :root { 
-            --gold: #d4af37; 
-            --bg: #050505; 
-            --glass: rgba(255, 255, 255, 0.03); 
-            --glass-border: rgba(212, 175, 55, 0.2);
-        }
-        
-        body { font-family: 'Assistant', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; }
+        :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); }
+        body { font-family: 'Assistant', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; touch-action: manipulation; }
         #stars-container { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
-
         header { padding: 80px 20px 40px; text-align: center; }
         h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 10vw, 4.5rem); color: var(--gold); margin: 0; font-style: italic; }
-
-        .gallery-wrapper { 
-            padding: 20px; columns: 4 280px; column-gap: 20px; 
-            max-width: 1400px; margin: 0 auto; padding-bottom: 150px; 
-        }
-
-        .photo-item { 
-            display: inline-block; width: 100%; margin-bottom: 20px; 
-            border-radius: 12px; overflow: hidden; background: var(--glass); 
-            backdrop-filter: blur(5px); border: 1px solid var(--glass-border); 
-            padding: 10px; box-sizing: border-box; cursor: pointer;
-            opacity: 0; transform: translateY(30px); transition: all 0.6s ease;
-        }
-
+        .gallery-wrapper { padding: 20px; columns: 4 280px; column-gap: 20px; max-width: 1400px; margin: 0 auto; padding-bottom: 150px; }
+        .photo-item { display: inline-block; width: 100%; margin-bottom: 20px; border-radius: 12px; overflow: hidden; background: var(--glass); backdrop-filter: blur(5px); border: 1px solid var(--glass-border); padding: 10px; box-sizing: border-box; cursor: pointer; opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
         .photo-item.reveal { opacity: 1; transform: translateY(0); }
-        .photo-item:hover { border-color: var(--gold); background: rgba(255, 255, 255, 0.07); transform: translateY(-5px); }
-        .photo-item img { width: 100%; display: block; border-radius: 6px; }
+        .photo-item img { width: 100%; display: block; border-radius: 6px; pointer-events: none; }
 
-        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 9999; }
+        #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.96); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 9999; cursor: grab; overflow: hidden; }
         #lightbox.active { display: flex; }
-        #lightbox img { max-width: 90%; max-height: 80vh; border: 1px solid var(--gold); border-radius: 4px; }
+        
+        /* תמונה עם תמיכה בזום */
+        #lb-img { 
+            max-width: 90%; max-height: 85vh; border: 1px solid var(--gold); 
+            border-radius: 4px; user-select: none; pointer-events: none;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s;
+            transform-origin: center;
+        }
 
-        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; }
-
+        #close-btn { position: absolute; top: 30px; right: 30px; font-size: 40px; color: white; cursor: pointer; z-index: 10001; opacity: 0.7; transition: 0.3s; }
+        #close-btn:hover { opacity: 1; color: var(--gold); }
+        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
         @media (max-width: 600px) { .gallery-wrapper { columns: 2 150px; } }
     </style>
 </head>
 <body>
 
 <div id="stars-container"></div>
-
-<audio id="bg-music" loop>
-    <source src="images/1/מלאך.mp3" type="audio/mpeg">
-</audio>
+<audio id="bg-music" loop><source src="images/1/מלאך.mp3" type="audio/mpeg"></audio>
 
 <header>
     <h1>יהונתן & יעל</h1>
-    <p style="color: #888; letter-spacing: 3px;">רגעים של מלאכים</p>
+    <p style="color: #888; letter-spacing: 3px;">דאבל-קליק לזום • גרירה למעבר</p>
 </header>
 
 <div class="gallery-wrapper" id="main-gallery"></div>
 
-<div id="lightbox" onclick="this.classList.remove('active')">
-    <img id="lb-img">
+<div id="lightbox" onmousedown="startDrag(event)" ontouchstart="startDrag(event)" ondblclick="toggleZoom()">
+    <span id="close-btn" onclick="closeLightbox()">&times;</span>
+    <img id="lb-img" src="">
 </div>
 
 <a href="index.html" class="back-home">↩ חזרה</a>
@@ -69,67 +56,117 @@
 <script>
     const gallery = document.getElementById('main-gallery');
     const music = document.getElementById('bg-music');
+    const lbImg = document.getElementById('lb-img');
+    const lightbox = document.getElementById('lightbox');
+    
+    let loadedImages = []; 
+    let currentIndex = 0;
+    let isZoomed = false;
 
-    // הפעלה אוטומטית של המוזיקה בלחיצה ראשונה על המסך
-    document.body.addEventListener('click', () => {
-        if (music.paused) {
-            music.play().catch(e => console.log("Music play blocked or failed:", e));
+    // משתני גרירה
+    let startX = 0, currentX = 0, isDragging = false;
+
+    // הפעלת מוזיקה
+    document.body.addEventListener('click', () => { if (music.paused) music.play(); }, { once: true });
+
+    function openLightbox(index) {
+        currentIndex = index;
+        isZoomed = false;
+        lbImg.src = loadedImages[currentIndex];
+        lbImg.style.transform = 'scale(1) translateX(0)';
+        lightbox.classList.add('active');
+    }
+
+    function closeLightbox() { lightbox.classList.remove('active'); }
+
+    function toggleZoom() {
+        isZoomed = !isZoomed;
+        lbImg.style.transform = isZoomed ? 'scale(2)' : 'scale(1)';
+    }
+
+    function changeImage(step) {
+        if (isZoomed) toggleZoom(); // איפוס זום במעבר תמונה
+        currentIndex += step;
+        if (currentIndex >= loadedImages.length) currentIndex = 0;
+        if (currentIndex < 0) currentIndex = loadedImages.length - 1;
+        
+        lbImg.style.opacity = "0";
+        setTimeout(() => {
+            lbImg.src = loadedImages[currentIndex];
+            lbImg.style.transform = 'scale(1) translateX(0)';
+            lbImg.style.opacity = "1";
+        }, 150);
+    }
+
+    function startDrag(e) {
+        if (isZoomed) return; // מניעת גרירת מעבר תמונה כשיש זום
+        isDragging = true;
+        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const moveHandler = (e) => {
+            if (!isDragging) return;
+            currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            const diff = currentX - startX;
+            lbImg.style.transform = `translateX(${diff}px)`;
+        };
+        const endHandler = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            const diff = currentX - startX;
+            if (Math.abs(diff) > 80) changeImage(diff > 0 ? -1 : 1);
+            else lbImg.style.transform = 'translateX(0)';
+            window.removeEventListener(e.type.includes('touch') ? 'touchmove' : 'mousemove', moveHandler);
+        };
+        window.addEventListener(e.type.includes('touch') ? 'touchmove' : 'mousemove', moveHandler);
+        window.addEventListener(e.type.includes('touch') ? 'touchend' : 'mouseup', endHandler, { once: true });
+    }
+
+    // לוגיקה לזיהוי דאבל-טאפ בטלפון (כי ondblclick לא תמיד עובד טוב בנייד)
+    let lastTap = 0;
+    lightbox.addEventListener('touchend', (e) => {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        if (tapLength < 300 && tapLength > 0) {
+            e.preventDefault();
+            toggleZoom();
         }
-    }, { once: true });
+        lastTap = currentTime;
+    });
 
-    // יצירת רשימת אותיות א' עד ס'
     const letters = ["א","ב","ג","ד","ה","ו","ז","ח","ט","י","יא","יב","יג","יד","טו","טז","יז","יח","יט","כ","כא","כב","כג","כד","כה","כו","כז","כח","כט","ל","לא","לב","לג","לד","לה","לו","לז","לח","לט","מ","מא","מב","מג","מד","מה","מו","מז","מח","מט","נ","נא","נב","נג","נד","נה","נו","נז","נח","נט","ס"];
     const folders = ['images', 'images/1'];
     const formats = ['jpg', 'png', 'jpeg', 'webp'];
 
-    const revealObserver = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('reveal');
-                revealObserver.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-
     function attemptLoad(fileName) {
         let found = false;
-        function checkPath(folderIdx, fmtIdx) {
-            if (found || folderIdx >= folders.length) return;
+        function checkPath(fIdx, fmtIdx) {
+            if (found || fIdx >= folders.length) return;
             const tempImg = new Image();
-            const currentPath = `${folders[folderIdx]}/${fileName}.${formats[fmtIdx]}`;
-            tempImg.src = currentPath;
-            tempImg.onload = function() {
+            const path = `${folders[fIdx]}/${fileName}.${formats[fmtIdx]}`;
+            tempImg.src = path;
+            tempImg.onload = () => {
                 if (found) return;
                 found = true;
+                const imgIdx = loadedImages.length;
+                loadedImages.push(path);
                 const item = document.createElement('div');
                 item.className = 'photo-item';
-                item.innerHTML = `<img src="${currentPath}">`;
-                item.onclick = () => {
-                    document.getElementById('lb-img').src = currentPath;
-                    document.getElementById('lightbox').classList.add('active');
-                };
+                item.innerHTML = `<img src="${path}">`;
+                item.onclick = (e) => { e.stopPropagation(); openLightbox(imgIdx); };
                 gallery.appendChild(item);
-                revealObserver.observe(item);
+                new IntersectionObserver((entries, obs) => {
+                    entries.forEach(en => { if (en.isIntersecting) { en.target.classList.add('reveal'); obs.unobserve(en.target); } });
+                }).observe(item);
             };
-            tempImg.onerror = function() {
-                if (found) return;
-                if (fmtIdx < formats.length - 1) {
-                    checkPath(folderIdx, fmtIdx + 1);
-                } else {
-                    checkPath(folderIdx + 1, 0);
-                }
-            };
+            tempImg.onerror = () => { if(!found) (fmtIdx < formats.length-1) ? checkPath(fIdx, fmtIdx+1) : checkPath(fIdx+1, 0); };
         }
         checkPath(0, 0);
     }
 
-    // טעינת תמונות
     for (let i = 1; i <= 100; i++) attemptLoad(i);
     letters.forEach(l => attemptLoad(l));
     ["proposal", "beach", "wedding"].forEach(s => attemptLoad(s));
 
-    // כוכבים
-    for (let i = 0; i < 60; i++) {
+    for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
         s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.3; border-radius:50%;`;
         document.getElementById('stars-container').appendChild(s);
