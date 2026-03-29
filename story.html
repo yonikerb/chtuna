@@ -3,96 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>הסיפור שלנו - Mobile Luxury</title>
+    <title>הסיפור שלנו - Glass Shine Edition</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;600&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://unpkg.com/aos@next/dist/aos.css" />
 
     <style>
         :root {
-            --dark-bg: #080808;
-            --glass: rgba(255, 255, 255, 0.03);
+            --dark-bg: #050505;
+            --glass: rgba(255, 255, 255, 0.04);
             --glass-border: rgba(255, 255, 255, 0.1);
             --gold: #d4af37;
-            --text: #e0e0e0;
+            --text: #f0f0f0;
         }
 
         body {
             margin: 0; padding: 0; background-color: var(--dark-bg); color: var(--text);
             font-family: 'Assistant', sans-serif; overflow-x: hidden;
-            background-image: radial-gradient(circle at top, #1a1a1a 0%, #080808 100%);
+            background-image: radial-gradient(circle at top, #1a1a1a 0%, #050505 100%);
         }
 
         header {
-            height: 35vh; display: flex; flex-direction: column; justify-content: center;
+            height: 30vh; display: flex; flex-direction: column; justify-content: center;
             align-items: center; text-align: center;
         }
 
         header h1 {
-            font-family: 'Cinzel Decorative', serif; font-size: 2.5rem;
-            color: var(--gold); margin: 0; text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+            font-family: 'Cinzel Decorative', serif; font-size: 2.2rem;
+            color: var(--gold); margin: 0;
         }
 
-        #story-timeline { max-width: 800px; margin: 0 auto; padding: 10px; padding-bottom: 100px; }
+        #story-timeline { max-width: 900px; margin: 0 auto; padding: 15px; padding-bottom: 120px; }
 
-        /* מבנה הכרטיס החדש */
+        /* כרטיס עם גובה גמיש ואפקט אור */
         .story-card {
             display: flex; align-items: stretch; 
-            background: var(--glass); backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border); border-radius: 20px;
-            margin-bottom: 25px; overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            height: 160px; /* גובה קבוע לכל הכרטיסים במובייל */
+            background: var(--glass); backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border); border-radius: 22px;
+            margin-bottom: 30px; overflow: hidden;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            position: relative; /* בשביל אפקט האור */
+            min-height: 180px;
         }
 
         .story-card:nth-child(even) { flex-direction: row-reverse; }
 
-        .image-box { flex: 0 0 40%; position: relative; }
+        /* אפקט ה"אור" שזז על הבאנר */
+        .story-card::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                to right, 
+                transparent, 
+                rgba(255, 255, 255, 0.08), 
+                transparent
+            );
+            transform: skewX(-25deg);
+            animation: shine 4s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -150%; }
+            50% { left: 150%; }
+            100% { left: 150%; }
+        }
+
+        .image-box { flex: 0 0 38%; position: relative; z-index: 1; }
         .image-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
         .text-box { 
-            flex: 1; padding: 15px; display: flex; flex-direction: column; justify-content: center;
-            overflow: hidden;
+            flex: 1; padding: 20px; display: flex; flex-direction: column; 
+            justify-content: center; z-index: 1;
         }
 
-        .date-container { margin-bottom: 5px; }
-        .hebrew-date { color: var(--gold); font-weight: 600; font-size: 0.85rem; display: block; }
-        .latin-date { font-size: 0.65rem; color: #666; display: block; }
+        .hebrew-date { color: var(--gold); font-weight: 600; font-size: 0.9rem; display: block; }
+        .latin-date { font-size: 0.7rem; color: #777; display: block; margin-bottom: 8px; }
 
         .text-box h2 {
-            font-family: 'Cinzel Decorative', serif; font-size: 1.1rem;
-            color: #fff; margin: 5px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            font-family: 'Cinzel Decorative', serif; font-size: 1.2rem;
+            color: #fff; margin: 5px 0;
         }
 
         .text-box p { 
-            font-size: 0.8rem; line-height: 1.4; color: #bbb; margin: 0;
-            display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;
+            font-size: 0.95rem; line-height: 1.5; color: #ccc; margin: 0;
+            /* ביטלנו את החיתוך - עכשיו רואים הכל */
         }
 
-        /* כפתור הוספה עגול ויוקרתי בצד */
+        /* כפתור הוספה */
         .add-btn-fixed {
-            position: fixed; bottom: 30px; left: 30px;
-            width: 60px; height: 60px; background: var(--gold); color: #000;
+            position: fixed; bottom: 35px; left: 35px;
+            width: 55px; height: 55px; background: var(--gold); color: #000;
             border: none; border-radius: 50%; cursor: pointer; z-index: 1000;
-            box-shadow: 0 10px 25px rgba(212,175,55,0.4);
-            font-size: 1.8rem; display: flex; align-items: center; justify-content: center;
-            transition: 0.3s;
+            box-shadow: 0 10px 20px rgba(212,175,55,0.3);
+            font-size: 1.5rem; display: flex; align-items: center; justify-content: center;
         }
 
         /* מודאל */
         #upload-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); backdrop-filter: blur(10px); z-index: 2000;
+            background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); z-index: 2000;
             justify-content: center; align-items: center;
         }
-        .modal-content { background: #151515; padding: 25px; border-radius: 25px; width: 85%; border: 1px solid #333; }
-        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #222; color: #fff; border: 1px solid #444; border-radius: 10px; box-sizing: border-box; }
+        .modal-content { background: #1a1a1a; padding: 25px; border-radius: 25px; width: 85%; max-width: 400px; }
+        input, textarea { width: 100%; padding: 12px; margin: 10px 0; background: #252525; color: #fff; border: 1px solid #333; border-radius: 10px; box-sizing: border-box; }
         .submit-btn { width: 100%; background: var(--gold); color: #000; padding: 15px; border: none; border-radius: 10px; font-weight: bold; }
 
-        @media (min-width: 769px) {
-            .story-card { height: 250px; margin-bottom: 50px; }
-            .text-box h2 { font-size: 1.8rem; }
-            .text-box p { font-size: 1.1rem; -webkit-line-clamp: 5; }
+        @media (max-width: 600px) {
+            .story-card { min-height: 150px; }
+            .image-box { flex: 0 0 35%; }
+            .text-box { padding: 15px; }
+            .text-box h2 { font-size: 1.1rem; }
+            .text-box p { font-size: 0.85rem; }
         }
     </style>
 </head>
@@ -100,7 +125,7 @@
 
     <header data-aos="fade">
         <h1>הסיפור שלנו</h1>
-        <p>Your Forever Story</p>
+        <p style="letter-spacing: 2px; font-size: 0.8rem; opacity: 0.5;">A JOURNEY OF LOVE</p>
     </header>
 
     <div id="story-timeline"></div>
@@ -109,12 +134,12 @@
 
     <div id="upload-modal">
         <div class="modal-content">
-            <h3 style="color: var(--gold); text-align: center;">הוספת רגע</h3>
+            <h3 style="color: var(--gold); text-align: center; margin-top: 0;">הוספת רגע חדש</h3>
             <input type="text" id="chapter-title" placeholder="כותרת">
-            <textarea id="chapter-desc" rows="3" placeholder="מה קרה שם?"></textarea>
+            <textarea id="chapter-desc" rows="4" placeholder="מה קרה שם?"></textarea>
             <input type="date" id="chapter-date">
             <input type="file" id="chapter-file" accept="image/*">
-            <button class="submit-btn" id="save-btn" onclick="processNewChapter()">פרסם</button>
+            <button class="submit-btn" id="save-btn" onclick="processNewChapter()">פרסם לסיפור</button>
             <button onclick="closeModal()" style="background:none; border:none; color:#555; width:100%; margin-top:15px; cursor:pointer;">ביטול</button>
         </div>
     </div>
@@ -147,23 +172,25 @@
             const timeline = document.getElementById('story-timeline');
             timeline.innerHTML = '';
             
+            let counter = 0;
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const card = document.createElement('div');
                 card.className = 'story-card';
+                if (counter % 2 !== 0) card.style.flexDirection = 'row-reverse';
+                
                 card.setAttribute('data-aos', 'fade-up');
                 card.innerHTML = `
                     <div class="image-box"><img src="${data.img}"></div>
                     <div class="text-box">
-                        <div class="date-container">
-                            <span class="hebrew-date">${data.hebDate}</span>
-                            <span class="latin-date">${data.latDate}</span>
-                        </div>
+                        <span class="hebrew-date">${data.hebDate}</span>
+                        <span class="latin-date">${data.latDate}</span>
                         <h2>${data.title}</h2>
                         <p>${data.desc}</p>
                     </div>
                 `;
                 timeline.appendChild(card);
+                counter++;
             });
             AOS.refresh();
         }
@@ -176,7 +203,7 @@
             const btn = document.getElementById('save-btn');
 
             if(!title || !latinDate || !file) return alert("מלא את כל הפרטים");
-            btn.disabled = true; btn.innerText = "...";
+            btn.disabled = true;
 
             try {
                 const storageRef = ref(storage, 'uploads/' + Date.now() + "_" + file.name);
@@ -195,7 +222,7 @@
         };
 
         loadTimeline();
-        AOS.init({ duration: 600, once: true });
+        AOS.init({ duration: 800, once: true });
     </script>
 </body>
 </html>
