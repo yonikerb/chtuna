@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יהונתן & יעל | גלריה</title>
+    <title>יהונתן & יעל | הגלריה המורחבת</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); }
@@ -11,7 +11,7 @@
         #stars-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
         header { padding: 60px 20px; text-align: center; }
         h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 4rem); color: var(--gold); margin: 0; font-style: italic; }
-        .gallery-wrapper { padding: 20px; columns: 4 250px; column-gap: 15px; max-width: 1400px; margin: 0 auto; }
+        .gallery-wrapper { padding: 20px; columns: 4 250px; column-gap: 15px; max-width: 1400px; margin: 0 auto; padding-bottom: 120px; }
         .photo-item { 
             display: inline-block; width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; 
             background: var(--glass); border: 1px solid rgba(212, 175, 55, 0.1); cursor: pointer;
@@ -22,8 +22,8 @@
         .photo-item:hover img { transform: scale(1.05); }
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.95); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 9999; }
         #lightbox.active { display: flex; }
-        #lightbox img { max-width: 90%; max-height: 80vh; border: 1px solid var(--gold); }
-        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; }
+        #lightbox img { max-width: 90%; max-height: 80vh; border: 1px solid var(--gold); border-radius: 4px; }
+        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 25px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transition: 0.3s; }
         @media (max-width: 600px) { .gallery-wrapper { columns: 2 150px; } }
     </style>
 </head>
@@ -32,7 +32,7 @@
 <div id="stars-container"></div>
 <header>
     <h1>יהונתן & יעל</h1>
-    <p style="color: #888;">הגלריה שלנו</p>
+    <p style="color: #888; letter-spacing: 2px;">OUR GALLERY</p>
 </header>
 
 <div class="gallery-wrapper" id="main-gallery"></div>
@@ -46,11 +46,24 @@
 <script>
     const gallery = document.getElementById('main-gallery');
     
-    // 1. רשימת קבצים ידנית (כאן תרשום את כל מה שלא מספר, למשל "proposal")
-    const specialPhotos = ["proposal", "beach", "engagement"]; 
-    
-    // 2. כמות תמונות ממוספרות (כמו בדף הראשון)
-    const maxNumberedPhotos = 50; 
+    // 1. יצירת רשימת אותיות מא' עד ק'
+    const lettersBase = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט", "י", "כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ", "ק"];
+    const allHebrew = [];
+    const units = ["א", "ב", "ג", "ד", "ה", "ו", "ז", "ח", "ט"];
+
+    // בניית כל הצירופים עד ק'
+    allHebrew.push(...units, "י");
+    units.forEach(u => allHebrew.push("י" + u)); // יא-יט
+    const tens = ["כ", "ל", "מ", "נ", "ס", "ע", "פ", "צ"];
+    tens.forEach(t => {
+        allHebrew.push(t);
+        units.forEach(u => allHebrew.push(t + u));
+    });
+    allHebrew.push("ק");
+
+    const maxNumberedPhotos = 200; 
+    const folders = ["images", "images/1"]; // רשימת התיקיות לחיפוש
+    const formats = ['jpg', 'JPG', 'png', 'PNG', 'heic', 'HEIC', 'jpeg', 'webp'];
 
     const revealObserver = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
@@ -66,21 +79,25 @@
         item.className = 'photo-item';
         const img = document.createElement('img');
         
-        // ניסיון טעינה של כמה פורמטים לכל תמונה
-        const formats = ['jpg', 'JPG', 'png', 'HEIC', 'jpeg'];
+        let folderIdx = 0;
         let fmtIdx = 0;
 
-        function tryNextFormat() {
+        // פונקציית חיפוש חכמה בשתי תיקיות ובכל הפורמטים
+        function tryNext() {
             if (fmtIdx < formats.length) {
-                img.src = `images/${fileName}.${formats[fmtIdx]}`;
+                img.src = `${folders[folderIdx]}/${fileName}.${formats[fmtIdx]}`;
                 fmtIdx++;
+            } else if (folderIdx < folders.length - 1) {
+                folderIdx++;
+                fmtIdx = 0;
+                tryNext();
             } else {
-                item.remove(); // אם לא נמצא בכלל, נמחק את התיבה
+                item.remove(); // לא נמצא בשום מקום
             }
         }
 
-        img.onerror = tryNextFormat;
-        tryNextFormat();
+        img.onerror = tryNext;
+        tryNext();
 
         item.appendChild(img);
         item.onclick = () => {
@@ -92,18 +109,18 @@
         revealObserver.observe(item);
     }
 
-    // קודם טוען את המיוחדות
-    specialPhotos.forEach(name => createPhotoItem(name));
-    
-    // אחר כך טוען את הממוספרות (מהסוף להתחלה כדי שהחדשות יהיו למעלה)
-    for (let i = maxNumberedPhotos; i >= 1; i--) {
-        createPhotoItem(i);
-    }
+    // --- הרצת הטעינה ---
+    // 1. מספרים (מ-200 עד 1)
+    for (let i = maxNumberedPhotos; i >= 1; i--) createPhotoItem(i);
+    // 2. אותיות עבריות (א' עד ק')
+    allHebrew.forEach(letter => createPhotoItem(letter));
+    // 3. שמות מיוחדים
+    ["proposal", "beach", "wedding"].forEach(name => createPhotoItem(name));
 
     // כוכבים
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 60; i++) {
         const s = document.createElement('div');
-        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.5;`;
+        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.4; border-radius:50%;`;
         document.getElementById('stars-container').appendChild(s);
     }
 </script>
