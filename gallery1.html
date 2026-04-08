@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יונתן & יעל | רגעים קסומים</title>
+    <title>יהונתן & יעל | רגעים קסומים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); }
@@ -51,6 +51,7 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+    // הגדרות Firebase - עודכן לכתובת שעליה הגדרת CORS
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
@@ -72,7 +73,7 @@
     async function loadGallery() {
         gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען את הרגעים שלכם...</p>';
         try {
-            // שימוש בנתיב התיקייה gallery כפי שמופיע ב-Console שלך
+            // רפרנס לתיקייה gallery כפי שמופיעה ב-Console
             const listRef = ref(storage, 'gallery'); 
             const res = await listAll(listRef);
             
@@ -106,7 +107,7 @@
     }
 
     async function processAndUpload(file) {
-        const fileName = `${Date.now()}_${file.name}`;
+        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
         const fileRef = ref(storage, `gallery/${fileName}`);
         try {
             await uploadBytes(fileRef, file);
