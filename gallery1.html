@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יהותן & יעל | רגעים קסומים</title>
+    <title>יהונתן & יעל | רגעים קסומים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); }
@@ -51,12 +51,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // הגדרות Firebase עם תיקון ה-storageBucket לכתובת היציבה יותר
+    // הגדרות Firebase המעודכנות
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
         projectId: "ourweddingstory",
-        storageBucket: "ourweddingstory.appspot.com", 
+        storageBucket: "ourweddingstory.firebasestorage.app", // הכתובת שאושרה ב-CORS
         messagingSenderId: "110939253444",
         appId: "1:110939253444:web:b491e5951a6ce353d53791",
         measurementId: "G-R77JLJCXKW"
@@ -71,11 +71,9 @@
     const lightbox = document.getElementById('lightbox');
     const fileInput = document.getElementById('file-upload');
 
-    // פונקציה לטעינת התמונות מה-Storage
     async function loadGallery() {
         gallery.innerHTML = '';
         try {
-            // גישה לתיקייה המדויקת
             const listRef = ref(storage, FOLDER_NAME);
             const res = await listAll(listRef);
             
@@ -101,7 +99,6 @@
         }
     }
 
-    // פונקציה להעלאת תמונות חדשות
     async function processAndUpload(file) {
         const path = `${FOLDER_NAME}/${Date.now()}_${file.name}`;
         const fileRef = ref(storage, path);
@@ -117,15 +114,12 @@
     fileInput.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
-        
-        // מעלה את התמונות ואז מרענן את הגלריה
         await Promise.all(files.map(f => processAndUpload(f)));
         loadGallery();
     });
 
     document.getElementById('close-btn').onclick = () => lightbox.style.display = 'none';
 
-    // יצירת רקע כוכבים דקורטיבי
     const starsContainer = document.getElementById('stars-container');
     for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
@@ -133,7 +127,6 @@
         starsContainer.appendChild(s);
     }
 
-    // הפעלה ראשונית
     loadGallery();
 </script>
 </body>
