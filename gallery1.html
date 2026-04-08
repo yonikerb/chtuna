@@ -14,7 +14,7 @@
         .upload-container { margin-top: 20px; }
         .upload-btn { display: inline-block; padding: 12px 30px; border: 1px solid var(--gold); border-radius: 50px; color: var(--gold); cursor: pointer; transition: 0.3s; background: var(--glass); font-weight: bold; }
         .upload-btn:hover { background: var(--gold); color: black; }
-        .gallery-wrapper { padding: 20px; columns: 4 280px; column-gap: 20px; max-width: 1400px; margin: 0 auto; padding-bottom: 150 Hebrew; }
+        .gallery-wrapper { padding: 20px; columns: 4 280px; column-gap: 20px; max-width: 1400px; margin: 0 auto; padding-bottom: 150px; }
         .photo-item { display: inline-block; width: 100%; margin-bottom: 20px; border-radius: 12px; overflow: hidden; background: var(--glass); backdrop-filter: blur(5px); border: 1px solid var(--glass-border); padding: 10px; box-sizing: border-box; cursor: pointer; opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
         .photo-item.reveal { opacity: 1; transform: translateY(0); }
         .photo-item img { width: 100%; display: block; border-radius: 6px; }
@@ -70,34 +70,39 @@
     const fileInput = document.getElementById('file-upload');
 
     async function loadGallery() {
-        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען...</p>';
+        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">מעלה זיכרונות...</p>';
         try {
-            // התיקון כאן: שימוש בנתיב מלא ומדויק
-            const listRef = ref(storage, 'gallery/'); 
+            // התיקון הקריטי: נתיב פשוט ללא סלאש מיותר בסוף
+            const listRef = ref(storage, 'gallery'); 
             const res = await listAll(listRef);
             
             gallery.innerHTML = '';
 
             if (res.items.length === 0) {
-                gallery.innerHTML = '<p style="text-align:center; color:#888;">הגלריה ריקה</p>';
+                gallery.innerHTML = '<p style="text-align:center; color:#888;">הגלריה מחכה לתמונות הראשונות שלכם</p>';
                 return;
             }
 
+            // טעינת תמונות אחת אחת כדי למנוע חסימה גורפת
             for (const itemRef of res.items) {
-                const url = await getDownloadURL(itemRef);
-                const item = document.createElement('div');
-                item.className = 'photo-item';
-                item.innerHTML = `<img src="${url}" loading="lazy">`;
-                item.onclick = () => {
-                    lbImg.src = url;
-                    lightbox.style.display = 'flex';
-                };
-                gallery.appendChild(item);
-                setTimeout(() => item.classList.add('reveal'), 100);
+                try {
+                    const url = await getDownloadURL(itemRef);
+                    const item = document.createElement('div');
+                    item.className = 'photo-item';
+                    item.innerHTML = `<img src="${url}" loading="lazy">`;
+                    item.onclick = () => {
+                        lbImg.src = url;
+                        lightbox.style.display = 'flex';
+                    };
+                    gallery.appendChild(item);
+                    setTimeout(() => item.classList.add('reveal'), 100);
+                } catch (e) {
+                    console.warn("דילוג על קובץ בעייתי:", itemRef.name);
+                }
             }
         } catch (err) {
-            console.error("שגיאה:", err);
-            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאת תקשורת. נסה לרענן.</p>';
+            console.error("שגיאה כללית:", err);
+            gallery.innerHTML = '<p style="color:red; text-align:center;">משהו השתבש בטעינה. נסה לרענן.</p>';
         }
     }
 
@@ -121,7 +126,7 @@
 
     document.getElementById('close-btn').onclick = () => lightbox.style.display = 'none';
 
-    // יצירת כוכבים
+    // יצירת אפקט כוכבים
     const starsContainer = document.getElementById('stars-container');
     for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
