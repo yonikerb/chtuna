@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יהונתן & יעל | רגעים קסומים</title>
+    <title>יונתן & יעל | רגעים קסומים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); }
@@ -51,7 +51,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // הגדרות מעודכנות - תואמות להגדרות ה-CORS שביצעת
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
@@ -73,7 +72,7 @@
     async function loadGallery() {
         gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען את הרגעים שלכם...</p>';
         try {
-            // רפרנס לתיקייה (ללא סלאש בהתחלה)
+            // שימוש בנתיב התיקייה gallery כפי שמופיע ב-Console שלך
             const listRef = ref(storage, 'gallery'); 
             const res = await listAll(listRef);
             
@@ -84,7 +83,6 @@
                 return;
             }
 
-            // טעינת תמונות בזו אחר זו
             for (const itemRef of res.items) {
                 try {
                     const url = await getDownloadURL(itemRef);
@@ -98,18 +96,17 @@
                     gallery.appendChild(item);
                     setTimeout(() => item.classList.add('reveal'), 100);
                 } catch (e) {
-                    console.error("שגיאה בטעינת קובץ ספציפי:", e);
+                    console.error("שגיאה בטעינת תמונה:", e);
                 }
             }
         } catch (err) {
             console.error("פירוט שגיאה מלא בטעינה:", err);
-            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאה בגישה לשרת התמונות. נסה שוב.</p>';
+            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאה בחיבור לגלריה. נסה לרענן.</p>';
         }
     }
 
     async function processAndUpload(file) {
-        // שם קובץ ייחודי כדי למנוע דריסה
-        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
+        const fileName = `${Date.now()}_${file.name}`;
         const fileRef = ref(storage, `gallery/${fileName}`);
         try {
             await uploadBytes(fileRef, file);
@@ -124,13 +121,12 @@
         const files = Array.from(e.target.files);
         if (!files.length) return;
         
-        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">מעלה רגעים קסומים... נא להמתין</p>';
+        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">מעלה תמונות... נא לא לסגור את הדף</p>';
         
         for (const file of files) {
             await processAndUpload(file);
         }
         
-        // טעינה מחדש של הגלריה לאחר סיום ההעלאות
         loadGallery();
     });
 
@@ -146,7 +142,7 @@
         }
     };
 
-    // אפקט כוכבים עדין לרקע
+    // כוכבים ברקע
     const starsContainer = document.getElementById('stars-container');
     for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
@@ -154,7 +150,6 @@
         starsContainer.appendChild(s);
     }
 
-    // הפעלה
     loadGallery();
 </script>
 </body>
