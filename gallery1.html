@@ -57,11 +57,9 @@
 <a href="index.html" class="back-home">חזרה</a>
 
 <script type="module">
-    // ייבוא Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // הקונפיגורציה שלך
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
@@ -75,6 +73,9 @@
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
     
+    // שם התיקייה הייעודית לאתר זה
+    const FOLDER_NAME = 'wedding_site';
+
     const gallery = document.getElementById('main-gallery');
     const music = document.getElementById('bg-music');
     const lbImg = document.getElementById('lb-img');
@@ -87,22 +88,20 @@
     let isZoomed = false;
     let startX = 0, currentX = 0, isDragging = false;
 
-    // פונקציה לטעינת כל התמונות מה-Storage
+    // טעינת תמונות רק מהתיקייה הספציפית
     async function loadGallery() {
         gallery.innerHTML = '';
         loadedImages = [];
-        const listRef = ref(storage, 'gallery');
+        const listRef = ref(storage, FOLDER_NAME);
         try {
             const res = await listAll(listRef);
-            // מיון התמונות לפי שם (כדי שהחדשות יהיו למטה או לפי סדר האלף-בית)
-            const items = res.items;
-            const urls = await Promise.all(items.map(item => getDownloadURL(item)));
+            const urls = await Promise.all(res.items.map(item => getDownloadURL(item)));
             
             urls.forEach((url, index) => {
                 loadedImages.push(url);
                 renderImage(url, index);
             });
-        } catch (err) { console.error("Error loading images:", err); }
+        } catch (err) { console.error("שגיאה בטעינה:", err); }
     }
 
     function renderImage(url, index) {
@@ -111,12 +110,10 @@
         item.innerHTML = `<img src="${url}" loading="lazy">`;
         item.onclick = () => openLightbox(index);
         gallery.appendChild(item);
-        
-        // אפקט הופעה הדרגתית
         setTimeout(() => item.classList.add('reveal'), 100);
     }
 
-    // פונקציית העלאה עם המרה ל-JPG
+    // העלאה עם המרה ל-JPG לתיקייה החדשה
     fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -134,31 +131,34 @@
                 ctx.drawImage(img, 0, 0);
 
                 canvas.toBlob(async (blob) => {
-                    const fileName = `gallery/${Date.now()}.jpg`;
-                    const fileRef = ref(storage, fileName);
+                    // העלאה לנתיב הכולל את שם התיקייה
+                    const filePath = `${FOLDER_NAME}/${Date.now()}.jpg`;
+                    const fileRef = ref(storage, filePath);
                     try {
-                        console.log("מעלה תמונה מומרת...");
                         await uploadBytes(fileRef, blob);
-                        loadGallery(); // רענון הגלריה
+                        loadGallery();
                     } catch (err) { alert("שגיאה בהעלאה: " + err.message); }
                 }, 'image/jpeg', 0.8);
             };
         };
     });
 
-    // מוזיקה
+    // מוזיקה ו-Lightbox
     document.body.addEventListener('click', () => { if (music.paused) music.play(); }, { once: true });
 
-    // מציג תמונות (Lightbox)
     function openLightbox(index) {
         currentIndex = index;
         isZoomed = false;
         lbImg.src = loadedImages[currentIndex];
         lbImg.style.transform = 'scale(1) translateX(0)';
+        lightbox.style.display = 'flex';
         lightbox.classList.add('active');
     }
 
-    function closeLightbox() { lightbox.classList.remove('active'); }
+    function closeLightbox() { 
+        lightbox.style.display = 'none';
+        lightbox.classList.remove('active'); 
+    }
     closeBtn.onclick = closeLightbox;
 
     function toggleZoom() {
@@ -177,7 +177,6 @@
         }, 150);
     }
 
-    // גרירה ב-Lightbox
     lightbox.onmousedown = lightbox.ontouchstart = (e) => {
         if (isZoomed) return;
         isDragging = true;
@@ -187,8 +186,7 @@
     window.onmousemove = window.ontouchmove = (e) => {
         if (!isDragging) return;
         currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        const diff = currentX - startX;
-        lbImg.style.transform = `translateX(${diff}px)`;
+        lbImg.style.transform = `translateX(${currentX - startX}px)`;
     };
 
     window.onmouseup = window.ontouchend = () => {
@@ -201,15 +199,13 @@
 
     lightbox.ondblclick = toggleZoom;
 
-    // יצירת כוכבים
-    const starsContainer = document.getElementById('stars-container');
-    for (let i = 0; i < 60; i++) {
+    // כוכבים
+    for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
-        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; border-radius:50%;`;
-        starsContainer.appendChild(s);
+        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.3; border-radius:50%;`;
+        document.getElementById('stars-container').appendChild(s);
     }
 
-    // טעינה ראשונית
     loadGallery();
 </script>
 </body>
