@@ -51,11 +51,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+    // הגדרות הפרויקט כפי שמופיעות ב-Console
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
         projectId: "ourweddingstory",
-        storageBucket: "ourweddingstory.firebasestorage.app",
+        storageBucket: "ourweddingstory.firebasestorage.app", // וודא שזה תואם ל-gs:// שלך
         messagingSenderId: "110939253444",
         appId: "1:110939253444:web:b491e5951a6ce353d53791",
         measurementId: "G-R77JLJCXKW"
@@ -72,8 +73,8 @@
     async function loadGallery() {
         gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען את הרגעים שלכם...</p>';
         try {
-            // שינוי קריטי: רפרנס נקי לתיקייה ללא סלאשים מיותרים
-            const listRef = ref(storage, 'gallery'); 
+            // גישה לתיקייה gallery בשורש האחסון
+            const listRef = ref(storage, 'gallery/'); 
             const res = await listAll(listRef);
             
             gallery.innerHTML = '';
@@ -83,8 +84,8 @@
                 return;
             }
 
-            // טעינה חכמה - כל תמונה נטענת בנפרד
-            res.items.forEach(async (itemRef) => {
+            // טעינת תמונות
+            for (const itemRef of res.items) {
                 try {
                     const url = await getDownloadURL(itemRef);
                     const item = document.createElement('div');
@@ -95,25 +96,29 @@
                         lightbox.style.display = 'flex';
                     };
                     gallery.appendChild(item);
+                    // השהייה קלה לאפקט ה-Reveal
                     setTimeout(() => item.classList.add('reveal'), 100);
                 } catch (e) {
-                    console.error("שגיאה בטעינת תמונה בודדת:", e);
+                    console.error("שגיאה בטעינת תמונה ספציפית:", e);
                 }
-            });
+            }
         } catch (err) {
-            console.error("שגיאה כללית בטעינת הגלריה:", err);
-            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאה בגישה למסד הנתונים. נסה לרענן.</p>';
+            console.error("פירוט שגיאה מלא:", err);
+            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאה בגישה לגלריה. בדוק את ה-Console.</p>';
         }
     }
 
     async function processAndUpload(file) {
-        // העלאה לתוך תיקיית gallery
-        const fileRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
+        // העלאה לתוך תיקיית gallery עם שם ייחודי
+        const fileName = `${Date.now()}_${file.name}`;
+        const fileRef = ref(storage, `gallery/${fileName}`);
         try {
             await uploadBytes(fileRef, file);
+            console.log("העלאה הושלמה:", fileName);
             return true;
         } catch (err) {
             console.error("שגיאה בהעלאה:", err);
+            alert("שגיאה בהעלאת הקובץ: " + file.name);
             return false;
         }
     }
@@ -121,20 +126,41 @@
     fileInput.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
-        await Promise.all(files.map(f => processAndUpload(f)));
+        
+        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">מעלה תמונות... נא לא לסגור את הדף</p>';
+        
+        for (const file of files) {
+            await processAndUpload(file);
+        }
+        
+        // טעינה מחדש של הגלריה לאחר הסיום
         loadGallery();
     });
 
-    document.getElementById('close-btn').onclick = () => lightbox.style.display = 'none';
+    document.getElementById('close-btn').onclick = () => {
+        lightbox.style.display = 'none';
+        lbImg.src = ''; // ניקוי ה-src כדי לחסוך ברוחב פס
+    };
 
-    // אפקט כוכבים
+    // סגירת ה-Lightbox בלחיצה מחוץ לתמונה
+    lightbox.onclick = (e) => {
+        if (e.target === lightbox) {
+            lightbox.style.display = 'none';
+            lbImg.src = '';
+        }
+    };
+
+    // אפקט כוכבים ברקע
     const starsContainer = document.getElementById('stars-container');
-    for (let i = 0; i < 50; i++) {
-        const s = document.createElement('div');
-        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; border-radius:50%;`;
-        starsContainer.appendChild(s);
+    if (starsContainer) {
+        for (let i = 0; i < 50; i++) {
+            const s = document.createElement('div');
+            s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; border-radius:50%;`;
+            starsContainer.appendChild(s);
+        }
     }
 
+    // הפעלה ראשונית
     loadGallery();
 </script>
 </body>
