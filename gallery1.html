@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>יהנתן & יעל | רגעים קסומים</title>
+    <title>יהונתן & יעל | רגעים קסומים</title>
     <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;400;700&family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
     <style>
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); }
@@ -51,12 +51,12 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // הגדרות Firebase עם תיקון ל-storageBucket
+    // הגדרות מעודכנות - תואמות להגדרות ה-CORS שביצעת
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
         projectId: "ourweddingstory",
-        storageBucket: "ourweddingstory.appspot.com", // הכתובת הקלאסית שפותרת שגיאות 400
+        storageBucket: "ourweddingstory.firebasestorage.app", 
         messagingSenderId: "110939253444",
         appId: "1:110939253444:web:b491e5951a6ce353d53791",
         measurementId: "G-R77JLJCXKW"
@@ -73,7 +73,7 @@
     async function loadGallery() {
         gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען את הרגעים שלכם...</p>';
         try {
-            // רפרנס נקי לתיקיית gallery
+            // רפרנס לתיקייה (ללא סלאש בהתחלה)
             const listRef = ref(storage, 'gallery'); 
             const res = await listAll(listRef);
             
@@ -84,7 +84,7 @@
                 return;
             }
 
-            // טעינה רציפה של התמונות
+            // טעינת תמונות בזו אחר זו
             for (const itemRef of res.items) {
                 try {
                     const url = await getDownloadURL(itemRef);
@@ -98,20 +98,18 @@
                     gallery.appendChild(item);
                     setTimeout(() => item.classList.add('reveal'), 100);
                 } catch (e) {
-                    console.error("שגיאה בטעינת קובץ:", itemRef.name, e);
+                    console.error("שגיאה בטעינת קובץ ספציפי:", e);
                 }
             }
         } catch (err) {
-            console.error("פירוט שגיאה מלא:", err);
-            // אם יש serverResponse, נדפיס אותו במיוחד ל-Debug
-            if (err.serverResponse) console.log("Server Response:", err.serverResponse);
-            
-            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאה בטעינת הגלריה. נסה לרענן.</p>';
+            console.error("פירוט שגיאה מלא בטעינה:", err);
+            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאה בגישה לשרת התמונות. נסה שוב.</p>';
         }
     }
 
     async function processAndUpload(file) {
-        const fileName = `${Date.now()}_${file.name}`;
+        // שם קובץ ייחודי כדי למנוע דריסה
+        const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
         const fileRef = ref(storage, `gallery/${fileName}`);
         try {
             await uploadBytes(fileRef, file);
@@ -126,12 +124,13 @@
         const files = Array.from(e.target.files);
         if (!files.length) return;
         
-        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">מעלה את הרגעים החדשים...</p>';
+        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">מעלה רגעים קסומים... נא להמתין</p>';
         
         for (const file of files) {
             await processAndUpload(file);
         }
         
+        // טעינה מחדש של הגלריה לאחר סיום ההעלאות
         loadGallery();
     });
 
@@ -147,7 +146,7 @@
         }
     };
 
-    // יצירת כוכבים ברקע
+    // אפקט כוכבים עדין לרקע
     const starsContainer = document.getElementById('stars-container');
     for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
@@ -155,6 +154,7 @@
         starsContainer.appendChild(s);
     }
 
+    // הפעלה
     loadGallery();
 </script>
 </body>
