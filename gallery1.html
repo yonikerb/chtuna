@@ -14,7 +14,7 @@
         .upload-container { margin-top: 20px; }
         .upload-btn { display: inline-block; padding: 12px 30px; border: 1px solid var(--gold); border-radius: 50px; color: var(--gold); cursor: pointer; transition: 0.3s; background: var(--glass); font-weight: bold; }
         .upload-btn:hover { background: var(--gold); color: black; }
-        .gallery-wrapper { padding: 20px; columns: 4 280px; column-gap: 20px; max-width: 1400px; margin: 0 auto; padding-bottom: 150px; }
+        .gallery-wrapper { padding: 20px; columns: 4 280px; column-gap: 20px; max-width: 1400px; margin: 0 auto; padding-bottom: 150 Hebrew; }
         .photo-item { display: inline-block; width: 100%; margin-bottom: 20px; border-radius: 12px; overflow: hidden; background: var(--glass); backdrop-filter: blur(5px); border: 1px solid var(--glass-border); padding: 10px; box-sizing: border-box; cursor: pointer; opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
         .photo-item.reveal { opacity: 1; transform: translateY(0); }
         .photo-item img { width: 100%; display: block; border-radius: 6px; }
@@ -63,7 +63,6 @@
 
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
-    const FOLDER_NAME = 'gallery'; 
 
     const gallery = document.getElementById('main-gallery');
     const lbImg = document.getElementById('lb-img');
@@ -71,68 +70,65 @@
     const fileInput = document.getElementById('file-upload');
 
     async function loadGallery() {
-        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען רגעים קסומים...</p>';
+        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען...</p>';
         try {
-            const listRef = ref(storage, FOLDER_NAME);
+            // התיקון כאן: שימוש בנתיב מלא ומדויק
+            const listRef = ref(storage, 'gallery/'); 
             const res = await listAll(listRef);
             
-            gallery.innerHTML = ''; // ניקוי הודעת הטעינה
+            gallery.innerHTML = '';
 
             if (res.items.length === 0) {
-                gallery.innerHTML = '<p style="text-align:center; color:#888;">עדיין אין תמונות בגלריה. היה הראשון להעלות!</p>';
+                gallery.innerHTML = '<p style="text-align:center; color:#888;">הגלריה ריקה</p>';
                 return;
             }
 
-            // טעינת כל ה-URLs במקביל
-            const urlPromises = res.items.map(item => getDownloadURL(item));
-            const urls = await Promise.all(urlPromises);
-
-            urls.forEach((url) => {
+            for (const itemRef of res.items) {
+                const url = await getDownloadURL(itemRef);
                 const item = document.createElement('div');
                 item.className = 'photo-item';
-                item.innerHTML = `<img src="${url}" alt="חתונה" loading="lazy">`;
+                item.innerHTML = `<img src="${url}" loading="lazy">`;
                 item.onclick = () => {
                     lbImg.src = url;
                     lightbox.style.display = 'flex';
                 };
                 gallery.appendChild(item);
-                // הוספת אפקט הופעה הדרגתי
                 setTimeout(() => item.classList.add('reveal'), 100);
-            });
+            }
         } catch (err) {
-            console.error("שגיאה בטעינת הגלריה:", err);
-            gallery.innerHTML = `<p style="text-align:center; color:red;">שגיאה בטעינת התמונות. וודא שהגדרות ה-CORS ב-Cloud Shell בוצעו.</p>`;
+            console.error("שגיאה:", err);
+            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאת תקשורת. נסה לרענן.</p>';
         }
     }
 
     async function processAndUpload(file) {
-        const fileName = `${Date.now()}_${file.name}`;
-        const fileRef = ref(storage, `${FOLDER_NAME}/${fileName}`);
+        const fileRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
         try {
             await uploadBytes(fileRef, file);
-            console.log("העלאה הצליחה:", fileName);
             return true;
         } catch (err) {
-            console.error("שגיאה בהעלאת קובץ:", file.name, err);
+            console.error("שגיאה בהעלאה:", err);
             return false;
         }
     }
 
     fileInput.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
-        if (files.length === 0) return;
-
-        const uploadPromises = files.map(file => processAndUpload(file));
-        await Promise.all(uploadPromises);
-        
-        // רענון הגלריה לאחר סיום כל ההעלאות
+        if (!files.length) return;
+        await Promise.all(files.map(f => processAndUpload(f)));
         loadGallery();
     });
 
     document.getElementById('close-btn').onclick = () => lightbox.style.display = 'none';
-    lightbox.onclick = (e) => { if (e.target !== lbImg) lightbox.style.display = 'none'; };
 
-    // טעינה ראשונית
+    // יצירת כוכבים
+    const starsContainer = document.getElementById('stars-container');
+    for (let i = 0; i < 50; i++) {
+        const s = document.createElement('div');
+        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; border-radius:50%;`;
+        starsContainer.appendChild(s);
+    }
+
     loadGallery();
 </script>
 </body>
