@@ -10,26 +10,19 @@
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); }
         body { font-family: 'Assistant', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; touch-action: manipulation; }
         #stars-container { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
-        
         header { padding: 60px 20px 30px; text-align: center; }
         h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 10vw, 4.5rem); color: var(--gold); margin: 0; font-style: italic; }
-        
         .upload-container { margin-top: 20px; }
         .upload-btn { display: inline-block; padding: 12px 30px; border: 1px solid var(--gold); border-radius: 50px; color: var(--gold); cursor: pointer; transition: 0.3s; background: var(--glass); font-weight: bold; }
         .upload-btn:hover { background: var(--gold); color: black; }
-
         .gallery-wrapper { padding: 20px; columns: 4 280px; column-gap: 20px; max-width: 1400px; margin: 0 auto; padding-bottom: 150px; }
         .photo-item { display: inline-block; width: 100%; margin-bottom: 20px; border-radius: 12px; overflow: hidden; background: var(--glass); backdrop-filter: blur(5px); border: 1px solid var(--glass-border); padding: 10px; box-sizing: border-box; cursor: pointer; opacity: 0; transform: translateY(30px); transition: all 0.6s ease; }
         .photo-item.reveal { opacity: 1; transform: translateY(0); }
         .photo-item img { width: 100%; display: block; border-radius: 6px; pointer-events: none; }
-
         #lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.96); backdrop-filter: blur(15px); display: none; justify-content: center; align-items: center; z-index: 9999; cursor: grab; overflow: hidden; }
-        #lightbox.active { display: flex; }
-        #lb-img { max-width: 90%; max-height: 85vh; border: 1px solid var(--gold); border-radius: 4px; user-select: none; pointer-events: none; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.2s; transform-origin: center; }
-
-        #close-btn { position: absolute; top: 30px; right: 30px; font-size: 40px; color: white; cursor: pointer; z-index: 10001; opacity: 0.7; transition: 0.3s; }
-        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        
+        #lb-img { max-width: 90%; max-height: 85vh; border: 1px solid var(--gold); border-radius: 4px; user-select: none; transition: transform 0.3s; }
+        #close-btn { position: absolute; top: 30px; right: 30px; font-size: 40px; color: white; cursor: pointer; z-index: 10001; }
+        .back-home { position: fixed; bottom: 30px; left: 30px; background: var(--gold); color: black; padding: 12px 28px; border-radius: 50px; text-decoration: none; font-weight: bold; z-index: 100; }
         @media (max-width: 600px) { .gallery-wrapper { columns: 2 150px; } }
     </style>
 </head>
@@ -72,7 +65,7 @@
 
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
-    const FOLDER_NAME = 'gallery';
+    const FOLDER_NAME = 'gallery'; // תואם לנתיב ששלחת
 
     const gallery = document.getElementById('main-gallery');
     const music = document.getElementById('bg-music');
@@ -83,54 +76,52 @@
 
     let loadedImages = []; 
     let currentIndex = 0;
-    let isZoomed = false;
-    let startX = 0, currentX = 0, isDragging = false;
 
     async function loadGallery() {
         gallery.innerHTML = '';
         loadedImages = [];
-        const listRef = ref(storage, FOLDER_NAME);
         try {
+            const listRef = ref(storage, FOLDER_NAME);
             const res = await listAll(listRef);
+            
             if (res.items.length === 0) return;
 
             const urls = await Promise.all(res.items.map(item => getDownloadURL(item)));
             urls.forEach((url, index) => {
                 loadedImages.push(url);
-                renderImage(url, index);
+                const item = document.createElement('div');
+                item.className = 'photo-item';
+                item.innerHTML = `<img src="${url}" loading="lazy">`;
+                item.onclick = () => {
+                    currentIndex = index;
+                    lbImg.src = url;
+                    lightbox.style.display = 'flex';
+                };
+                gallery.appendChild(item);
+                setTimeout(() => item.classList.add('reveal'), 100);
             });
-        } catch (err) { console.error("Error:", err); }
+        } catch (err) {
+            console.error("שגיאה בטעינה:", err);
+        }
     }
 
-    function renderImage(url, index) {
-        const item = document.createElement('div');
-        item.className = 'photo-item';
-        item.innerHTML = `<img src="${url}" loading="lazy">`;
-        item.onclick = () => openLightbox(index);
-        gallery.appendChild(item);
-        setTimeout(() => item.classList.add('reveal'), 100);
-    }
-
-    // פונקציית עזר להמרת קובץ בודד ל-JPG והעלאתו
     async function processAndUpload(file) {
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.readAsDataURL(file);
-            reader.onload = (event) => {
+            reader.onload = (e) => {
                 const img = new Image();
-                img.src = event.target.result;
-                img.onload = async () => {
+                img.src = e.target.result;
+                img.onload = () => {
                     const canvas = document.createElement('canvas');
+                    canvas.width = img.width; canvas.height = img.height;
                     const ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
                     ctx.drawImage(img, 0, 0);
-
                     canvas.toBlob(async (blob) => {
-                        const filePath = `${FOLDER_NAME}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.jpg`;
-                        const fileRef = ref(storage, filePath);
+                        // יצירת נתיב תואם בדיוק לפורמט ששלחת
+                        const path = `${FOLDER_NAME}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.jpg`;
                         try {
-                            await uploadBytes(fileRef, blob);
+                            await uploadBytes(ref(storage, path), blob);
                             resolve();
                         } catch (err) { reject(err); }
                     }, 'image/jpeg', 0.8);
@@ -139,80 +130,19 @@
         });
     }
 
-    // מאזין להעלאה מרובה
     fileInput.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
-        if (files.length === 0) return;
-
-        console.log(`מתחיל העלאה של ${files.length} תמונות...`);
-        
+        if (!files.length) return;
         try {
-            // מעלה את כל התמונות במקביל
-            await Promise.all(files.map(file => processAndUpload(file)));
-            alert(`כל ${files.length} התמונות עלו בהצלחה!`);
+            await Promise.all(files.map(f => processAndUpload(f)));
             loadGallery();
-        } catch (err) {
-            alert("חלק מהתמונות לא עלו: " + err.message);
-        }
+        } catch (err) { alert("שגיאה בהעלאה: " + err.message); }
     });
 
-    // שאר הפונקציות (Lightbox, גרירה וכו')
-    document.body.addEventListener('click', () => { if (music.paused) music.play(); }, { once: true });
+    closeBtn.onclick = () => lightbox.style.display = 'none';
+    document.body.addEventListener('click', () => { if (music.paused) music.play().catch(()=>{}); }, { once: true });
 
-    function openLightbox(index) {
-        currentIndex = index;
-        isZoomed = false;
-        lbImg.src = loadedImages[currentIndex];
-        lbImg.style.transform = 'scale(1) translateX(0)';
-        lightbox.style.display = 'flex';
-        lightbox.classList.add('active');
-    }
-
-    function closeLightbox() { 
-        lightbox.style.display = 'none';
-        lightbox.classList.remove('active'); 
-    }
-    closeBtn.onclick = closeLightbox;
-
-    function toggleZoom() {
-        isZoomed = !isZoomed;
-        lbImg.style.transform = isZoomed ? 'scale(2)' : 'scale(1)';
-    }
-
-    function changeImage(step) {
-        if (isZoomed) toggleZoom();
-        currentIndex = (currentIndex + step + loadedImages.length) % loadedImages.length;
-        lbImg.style.opacity = "0";
-        setTimeout(() => {
-            lbImg.src = loadedImages[currentIndex];
-            lbImg.style.transform = 'scale(1) translateX(0)';
-            lbImg.style.opacity = "1";
-        }, 150);
-    }
-
-    lightbox.onmousedown = lightbox.ontouchstart = (e) => {
-        if (isZoomed) return;
-        isDragging = true;
-        startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-    };
-
-    window.onmousemove = window.ontouchmove = (e) => {
-        if (!isDragging) return;
-        currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        lbImg.style.transform = `translateX(${currentX - startX}px)`;
-    };
-
-    window.onmouseup = window.ontouchend = () => {
-        if (!isDragging) return;
-        isDragging = false;
-        const diff = currentX - startX;
-        if (Math.abs(diff) > 80) changeImage(diff > 0 ? -1 : 1);
-        else lbImg.style.transform = 'scale(1) translateX(0)';
-    };
-
-    lightbox.ondblclick = toggleZoom;
-
-    // כוכבים
+    // יצירת כוכבים
     for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
         s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.3; border-radius:50%;`;
