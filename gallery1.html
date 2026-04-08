@@ -51,12 +51,11 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    // הגדרות Firebase המעודכנות
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
         projectId: "ourweddingstory",
-        storageBucket: "ourweddingstory.firebasestorage.app", // הכתובת שאושרה ב-CORS
+        storageBucket: "ourweddingstory.firebasestorage.app", 
         messagingSenderId: "110939253444",
         appId: "1:110939253444:web:b491e5951a6ce353d53791",
         measurementId: "G-R77JLJCXKW"
@@ -72,61 +71,68 @@
     const fileInput = document.getElementById('file-upload');
 
     async function loadGallery() {
-        gallery.innerHTML = '';
+        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען רגעים קסומים...</p>';
         try {
             const listRef = ref(storage, FOLDER_NAME);
             const res = await listAll(listRef);
             
+            gallery.innerHTML = ''; // ניקוי הודעת הטעינה
+
             if (res.items.length === 0) {
-                console.log("לא נמצאו תמונות בתיקייה gallery");
+                gallery.innerHTML = '<p style="text-align:center; color:#888;">עדיין אין תמונות בגלריה. היה הראשון להעלות!</p>';
                 return;
             }
 
-            const urls = await Promise.all(res.items.map(item => getDownloadURL(item)));
+            // טעינת כל ה-URLs במקביל
+            const urlPromises = res.items.map(item => getDownloadURL(item));
+            const urls = await Promise.all(urlPromises);
+
             urls.forEach((url) => {
                 const item = document.createElement('div');
                 item.className = 'photo-item';
-                item.innerHTML = `<img src="${url}" loading="lazy">`;
+                item.innerHTML = `<img src="${url}" alt="חתונה" loading="lazy">`;
                 item.onclick = () => {
                     lbImg.src = url;
                     lightbox.style.display = 'flex';
                 };
                 gallery.appendChild(item);
+                // הוספת אפקט הופעה הדרגתי
                 setTimeout(() => item.classList.add('reveal'), 100);
             });
         } catch (err) {
-            console.error("שגיאה בטעינת הגלריה:", err.message);
+            console.error("שגיאה בטעינת הגלריה:", err);
+            gallery.innerHTML = `<p style="text-align:center; color:red;">שגיאה בטעינת התמונות. וודא שהגדרות ה-CORS ב-Cloud Shell בוצעו.</p>`;
         }
     }
 
     async function processAndUpload(file) {
-        const path = `${FOLDER_NAME}/${Date.now()}_${file.name}`;
-        const fileRef = ref(storage, path);
+        const fileName = `${Date.now()}_${file.name}`;
+        const fileRef = ref(storage, `${FOLDER_NAME}/${fileName}`);
         try {
             await uploadBytes(fileRef, file);
+            console.log("העלאה הצליחה:", fileName);
             return true;
         } catch (err) {
-            console.error("שגיאה בהעלאה:", err);
+            console.error("שגיאה בהעלאת קובץ:", file.name, err);
             return false;
         }
     }
 
     fileInput.addEventListener('change', async (e) => {
         const files = Array.from(e.target.files);
-        if (!files.length) return;
-        await Promise.all(files.map(f => processAndUpload(f)));
+        if (files.length === 0) return;
+
+        const uploadPromises = files.map(file => processAndUpload(file));
+        await Promise.all(uploadPromises);
+        
+        // רענון הגלריה לאחר סיום כל ההעלאות
         loadGallery();
     });
 
     document.getElementById('close-btn').onclick = () => lightbox.style.display = 'none';
+    lightbox.onclick = (e) => { if (e.target !== lbImg) lightbox.style.display = 'none'; };
 
-    const starsContainer = document.getElementById('stars-container');
-    for (let i = 0; i < 50; i++) {
-        const s = document.createElement('div');
-        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; border-radius:50%;`;
-        starsContainer.appendChild(s);
-    }
-
+    // טעינה ראשונית
     loadGallery();
 </script>
 </body>
