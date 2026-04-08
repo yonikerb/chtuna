@@ -55,7 +55,7 @@
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
         projectId: "ourweddingstory",
-        storageBucket: "ourweddingstory.firebasestorage.app", 
+        storageBucket: "ourweddingstory.firebasestorage.app",
         messagingSenderId: "110939253444",
         appId: "1:110939253444:web:b491e5951a6ce353d53791",
         measurementId: "G-R77JLJCXKW"
@@ -70,21 +70,21 @@
     const fileInput = document.getElementById('file-upload');
 
     async function loadGallery() {
-        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">מעלה זיכרונות...</p>';
+        gallery.innerHTML = '<p style="text-align:center; color:var(--gold);">טוען את הרגעים שלכם...</p>';
         try {
-            // התיקון הקריטי: נתיב פשוט ללא סלאש מיותר בסוף
+            // שינוי קריטי: רפרנס נקי לתיקייה ללא סלאשים מיותרים
             const listRef = ref(storage, 'gallery'); 
             const res = await listAll(listRef);
             
             gallery.innerHTML = '';
 
             if (res.items.length === 0) {
-                gallery.innerHTML = '<p style="text-align:center; color:#888;">הגלריה מחכה לתמונות הראשונות שלכם</p>';
+                gallery.innerHTML = '<p style="text-align:center; color:#888;">הגלריה מחכה לתמונה הראשונה</p>';
                 return;
             }
 
-            // טעינת תמונות אחת אחת כדי למנוע חסימה גורפת
-            for (const itemRef of res.items) {
+            // טעינה חכמה - כל תמונה נטענת בנפרד
+            res.items.forEach(async (itemRef) => {
                 try {
                     const url = await getDownloadURL(itemRef);
                     const item = document.createElement('div');
@@ -97,16 +97,17 @@
                     gallery.appendChild(item);
                     setTimeout(() => item.classList.add('reveal'), 100);
                 } catch (e) {
-                    console.warn("דילוג על קובץ בעייתי:", itemRef.name);
+                    console.error("שגיאה בטעינת תמונה בודדת:", e);
                 }
-            }
+            });
         } catch (err) {
-            console.error("שגיאה כללית:", err);
-            gallery.innerHTML = '<p style="color:red; text-align:center;">משהו השתבש בטעינה. נסה לרענן.</p>';
+            console.error("שגיאה כללית בטעינת הגלריה:", err);
+            gallery.innerHTML = '<p style="color:red; text-align:center;">שגיאה בגישה למסד הנתונים. נסה לרענן.</p>';
         }
     }
 
     async function processAndUpload(file) {
+        // העלאה לתוך תיקיית gallery
         const fileRef = ref(storage, `gallery/${Date.now()}_${file.name}`);
         try {
             await uploadBytes(fileRef, file);
@@ -126,7 +127,7 @@
 
     document.getElementById('close-btn').onclick = () => lightbox.style.display = 'none';
 
-    // יצירת אפקט כוכבים
+    // אפקט כוכבים
     const starsContainer = document.getElementById('stars-container');
     for (let i = 0; i < 50; i++) {
         const s = document.createElement('div');
