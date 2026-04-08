@@ -36,14 +36,14 @@
 <body>
 
 <div id="stars-container"></div>
-<audio id="bg-music" loop><source src="images/1/1מלאך.mp3" type="audio/mpeg"></audio>
+<audio id="bg-music" loop><source src="images/1/music.mp3" type="audio/mpeg"></audio>
 
 <header>
     <h1>יהונתן & יעל</h1>
     <p style="color: #888; letter-spacing: 3px;">רגעים קסומים</p>
     <div class="upload-container">
-        <label for="file-upload" class="upload-btn">+ הוספת רגע קסום</label>
-        <input type="file" id="file-upload" style="display:none" accept="image/*">
+        <label for="file-upload" class="upload-btn">+ הוספת רגעים קסומים</label>
+        <input type="file" id="file-upload" style="display:none" accept="image/*" multiple>
     </div>
 </header>
 
@@ -72,9 +72,7 @@
 
     const app = initializeApp(firebaseConfig);
     const storage = getStorage(app);
-    
-    // שם התיקייה הייעודית לאתר זה
-    const FOLDER_NAME = 'wedding_site';
+    const FOLDER_NAME = 'gallery';
 
     const gallery = document.getElementById('main-gallery');
     const music = document.getElementById('bg-music');
@@ -88,20 +86,20 @@
     let isZoomed = false;
     let startX = 0, currentX = 0, isDragging = false;
 
-    // טעינת תמונות רק מהתיקייה הספציפית
     async function loadGallery() {
         gallery.innerHTML = '';
         loadedImages = [];
         const listRef = ref(storage, FOLDER_NAME);
         try {
             const res = await listAll(listRef);
+            if (res.items.length === 0) return;
+
             const urls = await Promise.all(res.items.map(item => getDownloadURL(item)));
-            
             urls.forEach((url, index) => {
                 loadedImages.push(url);
                 renderImage(url, index);
             });
-        } catch (err) { console.error("שגיאה בטעינה:", err); }
+        } catch (err) { console.error("Error:", err); }
     }
 
     function renderImage(url, index) {
@@ -113,37 +111,52 @@
         setTimeout(() => item.classList.add('reveal'), 100);
     }
 
-    // העלאה עם המרה ל-JPG לתיקייה החדשה
-    fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    // פונקציית עזר להמרת קובץ בודד ל-JPG והעלאתו
+    async function processAndUpload(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
 
-        const reader = new FileReader();
-        reader.readAsDataURL(file);
-        reader.onload = (event) => {
-            const img = new Image();
-            img.src = event.target.result;
-            img.onload = async () => {
-                const canvas = document.createElement('canvas');
-                const ctx = canvas.getContext('2d');
-                canvas.width = img.width;
-                canvas.height = img.height;
-                ctx.drawImage(img, 0, 0);
-
-                canvas.toBlob(async (blob) => {
-                    // העלאה לנתיב הכולל את שם התיקייה
-                    const filePath = `${FOLDER_NAME}/${Date.now()}.jpg`;
-                    const fileRef = ref(storage, filePath);
-                    try {
-                        await uploadBytes(fileRef, blob);
-                        loadGallery();
-                    } catch (err) { alert("שגיאה בהעלאה: " + err.message); }
-                }, 'image/jpeg', 0.8);
+                    canvas.toBlob(async (blob) => {
+                        const filePath = `${FOLDER_NAME}/${Date.now()}_${Math.random().toString(36).substr(2, 5)}.jpg`;
+                        const fileRef = ref(storage, filePath);
+                        try {
+                            await uploadBytes(fileRef, blob);
+                            resolve();
+                        } catch (err) { reject(err); }
+                    }, 'image/jpeg', 0.8);
+                };
             };
-        };
+        });
+    }
+
+    // מאזין להעלאה מרובה
+    fileInput.addEventListener('change', async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        console.log(`מתחיל העלאה של ${files.length} תמונות...`);
+        
+        try {
+            // מעלה את כל התמונות במקביל
+            await Promise.all(files.map(file => processAndUpload(file)));
+            alert(`כל ${files.length} התמונות עלו בהצלחה!`);
+            loadGallery();
+        } catch (err) {
+            alert("חלק מהתמונות לא עלו: " + err.message);
+        }
     });
 
-    // מוזיקה ו-Lightbox
+    // שאר הפונקציות (Lightbox, גרירה וכו')
     document.body.addEventListener('click', () => { if (music.paused) music.play(); }, { once: true });
 
     function openLightbox(index) {
