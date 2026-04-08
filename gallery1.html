@@ -10,10 +10,10 @@
         :root { --gold: #d4af37; --bg: #050505; --glass: rgba(255, 255, 255, 0.03); --glass-border: rgba(212, 175, 55, 0.2); }
         body { font-family: 'Assistant', sans-serif; background-color: var(--bg); color: white; margin: 0; overflow-x: hidden; touch-action: manipulation; }
         #stars-container { position: fixed; inset: 0; z-index: -1; background: radial-gradient(circle at center, #111 0%, #050505 100%); }
+        
         header { padding: 60px 20px 30px; text-align: center; }
         h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.8rem, 10vw, 4.5rem); color: var(--gold); margin: 0; font-style: italic; }
         
-        /* כפתור העלאה */
         .upload-container { margin-top: 20px; }
         .upload-btn { display: inline-block; padding: 12px 30px; border: 1px solid var(--gold); border-radius: 50px; color: var(--gold); cursor: pointer; transition: 0.3s; background: var(--glass); font-weight: bold; }
         .upload-btn:hover { background: var(--gold); color: black; }
@@ -57,9 +57,11 @@
 <a href="index.html" class="back-home">חזרה</a>
 
 <script type="module">
+    // ייבוא Firebase
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getStorage, ref, listAll, getDownloadURL, uploadBytes } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
+    // הקונפיגורציה שלך
     const firebaseConfig = {
         apiKey: "AIzaSyDrw3XrR4KKfb6fRETtlKG8KFlLidKeuPc",
         authDomain: "ourweddingstory.firebaseapp.com",
@@ -85,14 +87,17 @@
     let isZoomed = false;
     let startX = 0, currentX = 0, isDragging = false;
 
-    // טעינת תמונות ראשונית
+    // פונקציה לטעינת כל התמונות מה-Storage
     async function loadGallery() {
         gallery.innerHTML = '';
         loadedImages = [];
         const listRef = ref(storage, 'gallery');
         try {
             const res = await listAll(listRef);
-            const urls = await Promise.all(res.items.map(item => getDownloadURL(item)));
+            // מיון התמונות לפי שם (כדי שהחדשות יהיו למטה או לפי סדר האלף-בית)
+            const items = res.items;
+            const urls = await Promise.all(items.map(item => getDownloadURL(item)));
+            
             urls.forEach((url, index) => {
                 loadedImages.push(url);
                 renderImage(url, index);
@@ -103,36 +108,57 @@
     function renderImage(url, index) {
         const item = document.createElement('div');
         item.className = 'photo-item';
-        item.innerHTML = `<img src="${url}">`;
+        item.innerHTML = `<img src="${url}" loading="lazy">`;
         item.onclick = () => openLightbox(index);
         gallery.appendChild(item);
+        
+        // אפקט הופעה הדרגתית
         setTimeout(() => item.classList.add('reveal'), 100);
     }
 
-    // העלאת תמונה
+    // פונקציית העלאה עם המרה ל-JPG
     fileInput.addEventListener('change', async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        const fileRef = ref(storage, 'gallery/' + Date.now() + "_" + file.name);
-        try {
-            await uploadBytes(fileRef, file);
-            loadGallery();
-        } catch (err) { alert("שגיאה בהעלאה: " + err.message); }
+
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = (event) => {
+            const img = new Image();
+            img.src = event.target.result;
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = img.width;
+                canvas.height = img.height;
+                ctx.drawImage(img, 0, 0);
+
+                canvas.toBlob(async (blob) => {
+                    const fileName = `gallery/${Date.now()}.jpg`;
+                    const fileRef = ref(storage, fileName);
+                    try {
+                        console.log("מעלה תמונה מומרת...");
+                        await uploadBytes(fileRef, blob);
+                        loadGallery(); // רענון הגלריה
+                    } catch (err) { alert("שגיאה בהעלאה: " + err.message); }
+                }, 'image/jpeg', 0.8);
+            };
+        };
     });
 
-    // מוזיקה בלחיצה ראשונה
+    // מוזיקה
     document.body.addEventListener('click', () => { if (music.paused) music.play(); }, { once: true });
 
-    // Lightbox פונקציות
+    // מציג תמונות (Lightbox)
     function openLightbox(index) {
         currentIndex = index;
         isZoomed = false;
         lbImg.src = loadedImages[currentIndex];
         lbImg.style.transform = 'scale(1) translateX(0)';
-        lightbox.style.display = 'flex';
+        lightbox.classList.add('active');
     }
 
-    function closeLightbox() { lightbox.style.display = 'none'; }
+    function closeLightbox() { lightbox.classList.remove('active'); }
     closeBtn.onclick = closeLightbox;
 
     function toggleZoom() {
@@ -151,7 +177,7 @@
         }, 150);
     }
 
-    // גרירה וזום
+    // גרירה ב-Lightbox
     lightbox.onmousedown = lightbox.ontouchstart = (e) => {
         if (isZoomed) return;
         isDragging = true;
@@ -161,7 +187,8 @@
     window.onmousemove = window.ontouchmove = (e) => {
         if (!isDragging) return;
         currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-        lbImg.style.transform = `translateX(${currentX - startX}px)`;
+        const diff = currentX - startX;
+        lbImg.style.transform = `translateX(${diff}px)`;
     };
 
     window.onmouseup = window.ontouchend = () => {
@@ -174,13 +201,15 @@
 
     lightbox.ondblclick = toggleZoom;
 
-    // כוכבים ברקע
-    for (let i = 0; i < 50; i++) {
+    // יצירת כוכבים
+    const starsContainer = document.getElementById('stars-container');
+    for (let i = 0; i < 60; i++) {
         const s = document.createElement('div');
-        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:0.3; border-radius:50%;`;
-        document.getElementById('stars-container').appendChild(s);
+        s.style.cssText = `position:absolute; width:2px; height:2px; background:white; top:${Math.random()*100}%; left:${Math.random()*100}%; opacity:${Math.random()}; border-radius:50%;`;
+        starsContainer.appendChild(s);
     }
 
+    // טעינה ראשונית
     loadGallery();
 </script>
 </body>
